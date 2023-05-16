@@ -1,5 +1,5 @@
 from __future__ import annotations
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 
 
 class Argument(metaclass=ABCMeta):
@@ -7,7 +7,7 @@ class Argument(metaclass=ABCMeta):
         return " ".join(map(str, self._construct()))
 
     def _construct(self) -> list[str | ArgumentType]:
-        raise NotImplementedError
+        raise NotImplementedError(self.__class__)
 
 
 class Command(Argument, metaclass=ABCMeta):

@@ -48,9 +48,6 @@ class StorageNbt(NbtHolder):
 
 @dataclass
 class Nbt(Argument):
-    def __str__(self) -> str:
-        raise NotImplementedError
-
     def attr(self, name: str) -> Nbt:
         return NbtAttr(self, name)
 
