@@ -6,8 +6,7 @@ from core.command.base import Argument
 
 @dataclass
 class NbtTag(Argument):
-    @property
-    def argument_str(self) -> str:
+    def __str__(self) -> str:
         raise NotImplementedError
 
 
@@ -15,8 +14,7 @@ class NbtTag(Argument):
 class NbtByteTag(NbtTag):
     value: int
 
-    @property
-    def argument_str(self) -> str:
+    def __str__(self) -> str:
         return f"{self.value}b"
 
 
@@ -24,8 +22,7 @@ class NbtByteTag(NbtTag):
 class NbtShortTag(NbtTag):
     value: int
 
-    @property
-    def argument_str(self) -> str:
+    def __str__(self) -> str:
         return f"{self.value}s"
 
 
@@ -33,8 +30,7 @@ class NbtShortTag(NbtTag):
 class NbtIntTag(NbtTag):
     value: int
 
-    @property
-    def argument_str(self) -> str:
+    def __str__(self) -> str:
         return f"{self.value}"
 
 
@@ -42,8 +38,7 @@ class NbtIntTag(NbtTag):
 class NbtLongTag(NbtTag):
     value: int
 
-    @property
-    def argument_str(self) -> str:
+    def __str__(self) -> str:
         return f"{self.value}l"
 
 
@@ -51,8 +46,7 @@ class NbtLongTag(NbtTag):
 class NbtFloatTag(NbtTag):
     value: float
 
-    @property
-    def argument_str(self) -> str:
+    def __str__(self) -> str:
         return f"{self.value}f"
 
 
@@ -60,8 +54,7 @@ class NbtFloatTag(NbtTag):
 class NbtDoubleTag(NbtTag):
     value: float
 
-    @property
-    def argument_str(self) -> str:
+    def __str__(self) -> str:
         return f"{self.value}d"
 
 
@@ -69,8 +62,7 @@ class NbtDoubleTag(NbtTag):
 class NbtStringTag(NbtTag):
     value: str
 
-    @property
-    def argument_str(self) -> str:
+    def __str__(self) -> str:
         return self.value
 
 
@@ -78,18 +70,16 @@ class NbtStringTag(NbtTag):
 class NbtByteArrayTag(NbtTag):
     value: list[NbtByteTag]
 
-    @property
-    def argument_str(self) -> str:
-        return "[B;" + ",".join(v.argument_str for v in self.value) + "]"
+    def __str__(self) -> str:
+        return "[B;" + ",".join(str(v) for v in self.value) + "]"
 
 
 @dataclass
 class NbtIntArrayTag(NbtTag):
     value: list[NbtIntTag]
 
-    @property
-    def argument_str(self) -> str:
-        return "[I;" + ",".join(v.argument_str for v in self.value) + "]"
+    def __str__(self) -> str:
+        return "[I;" + ",".join(str(v) for v in self.value) + "]"
 
 
 T = TypeVar("T", bound=NbtTag)
@@ -99,15 +89,13 @@ T = TypeVar("T", bound=NbtTag)
 class NbtListTag(NbtTag, Generic[T]):
     value: list[T]
 
-    @property
-    def argument_str(self) -> str:
-        return "[" + ",".join(v.argument_str for v in self.value) + "]"
+    def __str__(self) -> str:
+        return "[" + ",".join(str(v) for v in self.value) + "]"
 
 
 @dataclass
 class NbtCompoundTag(NbtTag):
     value: dict[str, NbtTag]
 
-    @property
-    def argument_str(self) -> str:
-        return "{" + ",".join(k + ":" + v.argument_str for k, v in self.value.items()) + "}"
+    def __str__(self) -> str:
+        return "{" + ",".join(k + ":" + str(v) for k, v in self.value.items()) + "}"

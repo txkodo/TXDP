@@ -38,7 +38,6 @@ class IRange(Generic[N]):
         assert vmin <= vmax
         return self.__class__((vmin, vmax))
 
-    @property
     def tostr(self):
         if self.min == self.max:
             return str(self.min)
@@ -126,8 +125,7 @@ class TargetSelector(Argument):
             return True
         return self._limit == 1
 
-    @property
-    def argument_str(self) -> str:
+    def __str__(self) -> str:
         selectors: list[tuple[str, str]] = []
 
         if self._name is not None:
@@ -154,18 +152,17 @@ class TargetSelector(Argument):
                     selectors.append(("tag", ("" if v else "!") + k))
 
         if self._nbt is not None:
-            selectors.append(("nbt", self._nbt.argument_str))
+            selectors.append(("nbt", str(self._nbt)))
 
         if self._scores:
-            scores = "{" + ",".join(k + "=" + v.tostr for k, v in self._scores.items()) + "}"
+            scores = "{" + ",".join(f"{k}={v}" for k, v in self._scores.items()) + "}"
             selectors.append(("scores", scores))
 
         if self._advancements:
             advancements = (
                 "{"
                 + ",".join(
-                    k.argument_str
-                    + "="
+                    f"{k}="
                     + (
                         "true"
                         if v
@@ -180,16 +177,16 @@ class TargetSelector(Argument):
             selectors.append(("advancements", advancements))
 
         for k, v in self._predicates.items():
-            selectors.append(("type", ("" if v else "!") + k.argument_str))
+            selectors.append(("type", ("" if v else "!") + str(k)))
 
         if self._x_rotation is not None:
-            selectors.append(("x_rotation", self._x_rotation.tostr))
+            selectors.append(("x_rotation", str(self._x_rotation)))
 
         if self._y_rotation is not None:
-            selectors.append(("y_rotation", self._y_rotation.tostr))
+            selectors.append(("y_rotation", str(self._y_rotation)))
 
         if self._level is not None:
-            selectors.append(("level", self._level.tostr))
+            selectors.append(("level", str(self._level)))
 
         if self._x is not None:
             selectors.append(("x", str(self._x)))
@@ -206,7 +203,7 @@ class TargetSelector(Argument):
             selectors.append(("dz", str(self._dz)))
 
         if self._distance is not None:
-            selectors.append(("distance", self._distance.tostr))
+            selectors.append(("distance", str(self._distance)))
 
         match (self._selector, self._sort, self._limit):
             case ("self", None, None):

@@ -15,6 +15,9 @@ class Namespace:
         assert all(map(lambda x: x in namespaceChars, namespace))
         self.namespace = namespace
 
+    def __str__(self):
+        return self.namespace
+
     def child(self, name: str):
         return ResourceLocation(self, (name,))
 
@@ -37,8 +40,7 @@ class ResourceLocation(Argument):
     def __getattr__(self, name: str):
         return self.child(name)
 
-    @property
-    def argument_str(self) -> str:
+    def __str__(self) -> str:
         if self.namespace.namespace == "minecraft":
             return "/".join(self.parts)
         return self.namespace.namespace + ":" + "/".join(self.parts)

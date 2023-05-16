@@ -6,6 +6,5 @@ from core.command.base import Argument
 class Player(Argument):
     name: str
 
-    @property
-    def argument_str(self) -> str:
+    def __str__(self) -> str:
         return self.name

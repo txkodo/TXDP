@@ -10,6 +10,8 @@ class Datapack:
     functions: list[Function]
 
     def export(self):
-        rmtree(self.root_path / "data")
+        data_path = self.root_path / "data"
+        if data_path.exists():
+            rmtree(data_path)
         for f in self.functions:
             f.export(self.root_path)

@@ -11,4 +11,5 @@ class Function:
     def export(self, rootpath: Path):
         content = "\n".join(command.command_str for command in self.commands)
         path = self.location.function_path(rootpath)
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content)

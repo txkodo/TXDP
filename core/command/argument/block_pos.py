@@ -1,16 +1,15 @@
 from abc import ABCMeta
 from dataclasses import dataclass
 from typing import ClassVar
-from core.command.base import Argument
+from core.command.base import Argument, ArgumentType
 
 
 @dataclass
-class PosNotation(metaclass=ABCMeta):
+class PosNotation(Argument, metaclass=ABCMeta):
     value: float
     prefix: ClassVar[str]
 
-    @property
-    def tostr(self) -> str:
+    def __str__(self) -> str:
         return f"{self.prefix}{self.value}"
 
 
@@ -35,9 +34,8 @@ class BlockPos(Argument, metaclass=ABCMeta):
     y: PosNotation
     z: PosNotation
 
-    @property
-    def argument_str(self) -> str:
-        return f"{self.x.tostr} {self.y.tostr} {self.z.tostr}"
+    def _construct(self) -> list[ArgumentType]:
+        return [self.x, self.y, self.z]
 
 
 @dataclass

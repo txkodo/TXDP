@@ -7,5 +7,5 @@ class UUID(Argument):
         self.uuid = UUID(uuid) if isinstance(uuid, str) else uuid4()
 
     @property
-    def argument_str(self) -> str:
+    def __str__(self) -> str:
         return str(self.uuid)
