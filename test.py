@@ -1,13 +1,23 @@
+from builder import *
+from builder.nbt import String
 from core import *
 
-c = DataGet(StorageNbt(Namespace("hello").child("test")).root("baka"))
+c = DataGetCommand(StorageNbt(Namespace("hello").child("test")).root("baka"))
 
-f = Function(Namespace("hello").child("test"), [c, c, c, c, c])
+funcpath = Namespace("hello").child("world")
 
-d = Datapack(Path(""), [f])
+n = StorageNbt(Namespace("hello").child("test")).root("baka")
+
+strin = String(n)
+
+@FunctionBuilder(funcpath)
+def test():
+    Run(strin.Set(strin.slice(1,4)))
+    Run(strin.Set(strin))
+    Run(strin.Set(NbtStringTag("hello")))
 
 
-d.export()
+export(Path())
 
 
 # @asyncmcf(hello.test)
