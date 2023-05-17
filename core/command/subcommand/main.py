@@ -6,7 +6,7 @@ from core.command.argument.entity import Entity
 from core.command.base import ArgumentType, SubCommand
 
 
-@dataclass
+@dataclass(frozen=True)
 class AsSubCommand(SubCommand):
     target: Entity
 
@@ -14,7 +14,7 @@ class AsSubCommand(SubCommand):
         return ["as", self.target]
 
 
-@dataclass
+@dataclass(frozen=True)
 class AtSubCommand(SubCommand):
     pos: BlockPos
 
@@ -22,7 +22,7 @@ class AtSubCommand(SubCommand):
         return ["at", self.pos]
 
 
-@dataclass
+@dataclass(frozen=True)
 class OnSubCommand(SubCommand):
     relation: Literal["attacker", "controller", "leasher", "origin", "owner", "passengers", "target", "vehicle"]
 

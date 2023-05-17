@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from core.command.base import ArgumentType, Command, SubCommand
 
 
-@dataclass
+@dataclass(frozen=True)
 class ExecuteCommand(Command):
     sub_commands: list[SubCommand]
     command: Command

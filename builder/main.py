@@ -1,11 +1,14 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
+from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Callable, ClassVar
+from typing import Callable, ClassVar, Generic, TypeVar
 from builder.id import funcId
+from builder.nbt import NbtBase
+from builder.varstack import VarStack
 from core.command.argument.block_pos import BlockPos
 from core.command.argument.entity import Entity
-from core.command.argument.resource_location import Namespace, ResourceLocation
+from core.command.argument.resource_location import ResourceLocation
 from core.command.base import Command, SubCommand
 from core.command.command.execute import ExecuteCommand
 from core.command.command.function import FunctionCommand
@@ -13,13 +16,22 @@ from core.command.subcommand.main import AsSubCommand, AtSubCommand, OnSubComman
 from core.datapack.datapack import Datapack
 from core.datapack.function import Function
 
+R = TypeVar("R")
+S = TypeVar("S")
+
+
+class Symbol(Enum):
+    NO_RESULT = auto()
+
 
 @dataclass
-class FunctionBuilder:
+class FunctionBuilder(Generic[R]):
     builders: ClassVar[list[FunctionBuilder]] = []
     stack: ClassVar[list[FunctionBuilder]] = []
     resource_location: ResourceLocation
+    carryids: set[str] | None = None
     commands: list[Command] = field(default_factory=list)
+    result: R | None = None
 
     def __post_init__(self):
         FunctionBuilder.builders.append(self)
@@ -27,7 +39,13 @@ class FunctionBuilder:
     def export(self):
         return Function(self.resource_location, self.commands)
 
-    def call(self):
+    def Call(self) -> R:
+        Run(FunctionCommand(self.resource_location))
+        if self.carryids is not None:
+            [VarStack.add(id) for id in self.carryids]
+        return self.result
+
+    def call_command(self):
         return FunctionCommand(self.resource_location)
 
     def __enter__(self):
@@ -36,9 +54,29 @@ class FunctionBuilder:
     def __exit__(self, *args):
         FunctionBuilder.stack.pop()
 
-    def __call__(self, func: Callable[[], None]) -> Any:
+    def __call__(self, func: Callable[[], S]) -> FunctionBuilder[S]:
         with self:
-            func()
+            VarStack.push()
+
+            result = func()
+            match result:
+                case tuple():
+                    carry = {i.nbt for i in result if isinstance(NbtBase, i)}
+                case NbtBase():
+                    carry = {result.nbt}  # type: ignore
+                case _:
+                    carry = set()
+
+            self.result = result  # type: ignore
+
+            cmds, ids = VarStack.collect(carry)
+
+            self.carryids = ids
+
+            for cmd in cmds:
+                Run(cmd)
+
+        return self  # type: ignore
 
 
 def export(path: Path):
@@ -48,8 +86,9 @@ def export(path: Path):
 def Run(command: Command):
     FunctionBuilder.stack[-1].commands.append(command)
 
+NbtBase.Run = Run
 
-@dataclass
+@dataclass(frozen=True)
 class ExecuteOn:
     holder: ExecuteBuilder
 
@@ -86,7 +125,7 @@ class ExecuteOn:
         return self.holder.append(OnSubCommand("vehicle"))
 
 
-FUNC_LOCATION = Namespace("minecraft").child("_")
+FUNC_LOCATION = ResourceLocation("minecraft:_")
 
 
 @dataclass
@@ -96,7 +135,7 @@ class ExecuteBuilder:
 
     def __enter__(self):
         self.func = FunctionBuilder(FUNC_LOCATION.child(funcId()))
-        Run(self.func.call())
+        self.Run(self.func.call_command())
         self.func.__enter__()
 
     def __exit__(self, *args):

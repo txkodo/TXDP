@@ -4,7 +4,7 @@ from shutil import rmtree
 from core.datapack.function import Function
 
 
-@dataclass
+@dataclass(frozen=True)
 class Datapack:
     root_path: Path
     functions: list[Function]

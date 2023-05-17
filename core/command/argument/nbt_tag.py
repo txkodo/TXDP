@@ -1,16 +1,18 @@
 from dataclasses import dataclass
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from core.command.base import Argument
 
 
-@dataclass
+@dataclass(frozen=True)
 class NbtTag(Argument):
+    value: Any
+
     def __str__(self) -> str:
         raise NotImplementedError
 
 
-@dataclass
+@dataclass(frozen=True)
 class NbtByteTag(NbtTag):
     value: int
 
@@ -18,7 +20,7 @@ class NbtByteTag(NbtTag):
         return f"{self.value}b"
 
 
-@dataclass
+@dataclass(frozen=True)
 class NbtShortTag(NbtTag):
     value: int
 
@@ -26,7 +28,7 @@ class NbtShortTag(NbtTag):
         return f"{self.value}s"
 
 
-@dataclass
+@dataclass(frozen=True)
 class NbtIntTag(NbtTag):
     value: int
 
@@ -34,7 +36,7 @@ class NbtIntTag(NbtTag):
         return f"{self.value}"
 
 
-@dataclass
+@dataclass(frozen=True)
 class NbtLongTag(NbtTag):
     value: int
 
@@ -42,7 +44,7 @@ class NbtLongTag(NbtTag):
         return f"{self.value}l"
 
 
-@dataclass
+@dataclass(frozen=True)
 class NbtFloatTag(NbtTag):
     value: float
 
@@ -50,7 +52,7 @@ class NbtFloatTag(NbtTag):
         return f"{self.value}f"
 
 
-@dataclass
+@dataclass(frozen=True)
 class NbtDoubleTag(NbtTag):
     value: float
 
@@ -58,15 +60,24 @@ class NbtDoubleTag(NbtTag):
         return f"{self.value}d"
 
 
-@dataclass
+def needQuoted(s):
+    return any(c in s for c in " '\"\n\t\u00A0\u3000")
+
+
+@dataclass(frozen=True)
 class NbtStringTag(NbtTag):
     value: str
 
     def __str__(self) -> str:
-        return self.value
+        value = self.value
+        value = value.replace("\\", "\\\\")
+        if '"' not in value:
+            return '"' + value + '"'
+        else:
+            return "'" + value.replace("'", "\\'") + "'"
 
 
-@dataclass
+@dataclass(frozen=True)
 class NbtByteArrayTag(NbtTag):
     value: list[NbtByteTag]
 
@@ -74,7 +85,7 @@ class NbtByteArrayTag(NbtTag):
         return "[B;" + ",".join(str(v) for v in self.value) + "]"
 
 
-@dataclass
+@dataclass(frozen=True)
 class NbtIntArrayTag(NbtTag):
     value: list[NbtIntTag]
 
@@ -85,7 +96,7 @@ class NbtIntArrayTag(NbtTag):
 T = TypeVar("T", bound=NbtTag)
 
 
-@dataclass
+@dataclass(frozen=True)
 class NbtListTag(NbtTag, Generic[T]):
     value: list[T]
 
@@ -93,7 +104,7 @@ class NbtListTag(NbtTag, Generic[T]):
         return "[" + ",".join(str(v) for v in self.value) + "]"
 
 
-@dataclass
+@dataclass(frozen=True)
 class NbtCompoundTag(NbtTag):
     value: dict[str, NbtTag]
 

@@ -3,7 +3,7 @@ from core.command.argument.resource_location import ResourceLocation
 from core.command.base import ArgumentType, Command
 
 
-@dataclass
+@dataclass(frozen=True)
 class FunctionCommand(Command):
     function: ResourceLocation
 

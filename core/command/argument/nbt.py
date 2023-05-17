@@ -1,6 +1,5 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import TypeAlias
 from core.command.argument.block_pos import BlockPos
 from core.command.argument.entity import Entity
 from core.command.argument.nbt_tag import NbtCompoundTag
@@ -9,16 +8,16 @@ from core.command.argument.selector import TargetSelector
 from core.command.base import Argument, ArgumentType
 
 
-@dataclass
+@dataclass(frozen=True)
 class NbtHolder(Argument):
     def root(self, name: str):
-        return NbtRoot(self, name)
+        return NbtRoot(self, (NbtRootSegment(name),))
 
     def root_match(self, match: NbtCompoundTag):
-        return NbtRootMatch(self, match)
+        return NbtRootMatch(self, (NbtRootMatchSegment(match),))
 
 
-@dataclass
+@dataclass(frozen=True)
 class BlockNbt(NbtHolder):
     position: BlockPos
 
@@ -26,7 +25,7 @@ class BlockNbt(NbtHolder):
         return ["block", self.position]
 
 
-@dataclass
+@dataclass(frozen=True)
 class EntityNbt(NbtHolder):
     entity: Entity
 
@@ -38,7 +37,7 @@ class EntityNbt(NbtHolder):
         return ["entity", self.entity]
 
 
-@dataclass
+@dataclass(frozen=True)
 class StorageNbt(NbtHolder):
     resource_location: ResourceLocation
 
@@ -46,96 +45,135 @@ class StorageNbt(NbtHolder):
         return ["storage", self.resource_location]
 
 
-@dataclass
-class Nbt(Argument):
-    def attr(self, name: str) -> Nbt:
-        return NbtAttr(self, name)
-
-    def match(self, value: NbtCompoundTag) -> Nbt:
-        return NbtMatch(self, value)
-
-    def item(self, index: int) -> Nbt:
-        return NbtItem(self, index)
-
-    def filter(self, value: NbtCompoundTag) -> Nbt:
-        return NbtFilteredItem(self, value)
-
-    def all(self) -> Nbt:
-        return NbtAllItem(self)
-
-
-@dataclass
-class NbtRoot(Nbt):
-    holder: NbtHolder
-    name: str
-
-    def _construct(self) -> list[ArgumentType]:
-        return [self.holder, self.name]
-
-
-@dataclass
-class NbtRootMatch(Nbt):
-    holder: NbtHolder
-    match_value: NbtCompoundTag
-
-    def _construct(self) -> list[ArgumentType]:
-        return [self.holder, self.match_value]
-
-    def match(self, value: NbtCompoundTag):
+@dataclass(frozen=True)
+class NbtSegment:
+    def __str__(self) -> str:
         raise NotImplementedError
 
 
-@dataclass
-class NbtAttr(Nbt):
-    parent: Nbt
+@dataclass(frozen=True)
+class NbtRootSegment(NbtSegment):
     name: str
 
     def __str__(self) -> str:
-        return f"{self.parent}.{self.name}"
+        return self.name
 
 
-@dataclass
-class NbtMatch(Nbt):
-    parent: Nbt
-    match_value: NbtCompoundTag
+@dataclass(frozen=True)
+class NbtRootMatchSegment(NbtSegment):
+    match: NbtCompoundTag
 
     def __str__(self) -> str:
-        return str(self.parent) + str(self.match_value)
-
-    def match(self, value: NbtCompoundTag):
-        raise NotImplementedError
+        return str(self.match)
 
 
-@dataclass
-class NbtItem(Nbt):
-    parent: Nbt
+@dataclass(frozen=True)
+class NbtAttrSegment(NbtSegment):
+    attr: str
+
+    def __str__(self) -> str:
+        return "." + self.attr
+
+
+@dataclass(frozen=True)
+class NbtMatchSegment(NbtSegment):
+    match: NbtCompoundTag
+
+    def __str__(self) -> str:
+        return str(self.match)
+
+
+@dataclass(frozen=True)
+class NbtItemSegment(NbtSegment):
     index: int
 
     def __str__(self) -> str:
-        return f"{self.parent}[{self.index}]"
-
-    def match(self, value: NbtCompoundTag):
-        raise NotImplementedError
+        return f"[{self.index}]"
 
 
-@dataclass
-class NbtFilteredItem(Nbt):
-    parent: Nbt
+@dataclass(frozen=True)
+class NbtFilteredItemSegment(NbtSegment):
     filter: NbtCompoundTag
 
     def __str__(self) -> str:
-        return f"{self.parent}[{self.filter.__str__}]"
+        return f"[{self.filter}]"
+
+
+@dataclass(frozen=True)
+class NbtAllItemSegment(NbtSegment):
+    def __str__(self) -> str:
+        return "[]"
+
+
+@dataclass(frozen=True)
+class Nbt(Argument):
+    holder: NbtHolder
+    segments: tuple[NbtSegment, ...]
+
+    def __str__(self) -> str:
+        return f"{self.holder} {''.join(map(str,self.segments))}"
+
+    def attr(self, name: str) -> Nbt:
+        return NbtAttr(self.holder, (*self.segments, NbtAttrSegment(name)))
+
+    def match(self, value: NbtCompoundTag) -> Nbt:
+        return NbtMatch(self.holder, (*self.segments, NbtMatchSegment(value)))
+
+    def item(self, index: int) -> Nbt:
+        return NbtItem(self.holder, (*self.segments, NbtItemSegment(index)))
+
+    def filter(self, value: NbtCompoundTag) -> Nbt:
+        return NbtFilteredItem(self.holder, (*self.segments, NbtFilteredItemSegment(value)))
+
+    def all(self) -> Nbt:
+        return NbtAllItem(self.holder, (*self.segments, NbtAllItemSegment()))
+
+
+@dataclass(frozen=True)
+class NbtRoot(Nbt):
+    pass
+
+
+@dataclass(frozen=True)
+class NbtRootMatch(Nbt):
+    pass
 
     def match(self, value: NbtCompoundTag):
         raise NotImplementedError
 
 
-@dataclass
-class NbtAllItem(Nbt):
-    parent: Nbt
+@dataclass(frozen=True)
+class NbtAttr(Nbt):
+    pass
 
-    def __str__(self) -> str:
-        return f"{self.parent}[]"
+
+@dataclass(frozen=True)
+class NbtMatch(Nbt):
+    pass
+
+    def match(self, value: NbtCompoundTag):
+        raise NotImplementedError
+
+
+@dataclass(frozen=True)
+class NbtItem(Nbt):
+    pass
+
+    def match(self, value: NbtCompoundTag):
+        raise NotImplementedError
+
+
+@dataclass(frozen=True)
+class NbtFilteredItem(Nbt):
+    pass
+
+    def match(self, value: NbtCompoundTag):
+        raise NotImplementedError
+
+
+@dataclass(frozen=True)
+class NbtAllItem(Nbt):
+    pass
 
     def match(self, value: NbtCompoundTag):
         raise NotImplementedError

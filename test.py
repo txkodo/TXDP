@@ -1,24 +1,39 @@
 from builder import *
-from builder.nbt import String
+from builder.mcf import mcf
 from core import *
 
-c = DataGetCommand(StorageNbt(Namespace("hello").child("test")).root("baka"))
+c = DataGetCommand(StorageNbt(ResourceLocation("hello:test")).root("baka"))
 
-funcpath = Namespace("hello").child("world")
+funcpath = ResourceLocation("hello:world")
 
-n = StorageNbt(Namespace("hello").child("test")).root("baka")
+n = StorageNbt(ResourceLocation("hello:test")).root("baka")
 
-strin = String(n)
+lb = List[Byte](n)
+
+s = String(n)
+
+
+@mcf
+def inner(s: String):
+    a = String()
+    b = String()
+    Run(b.Set(s))
+    Run(a.Set(b.slice(1, 4)))
+    return a
+
 
 @FunctionBuilder(funcpath)
 def test():
-    Run(strin.Set(strin.slice(1,4)))
-    Run(strin.Set(strin))
-    Run(strin.Set(NbtStringTag("hello")))
+    o = String.new("helloworld")
+
+    with Execute.As(Player("txkodo")):
+        a = inner(o)
+        Run(a.Set("hello"))
+
+    Run(a.Set("world"))
 
 
 export(Path())
-
 
 # @asyncmcf(hello.test)
 # await def test():

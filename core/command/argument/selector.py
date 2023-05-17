@@ -58,7 +58,7 @@ class FloatRange(IRange[float]):
     MIN: float = -float("infinity")
 
 
-@dataclass
+@dataclass(frozen=True)
 class TargetSelector(Argument):
     _selector: Literal["self", "player", "entity"]
     _sort: Sort | None = None

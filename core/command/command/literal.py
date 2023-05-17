@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from core.command.base import ArgumentType, Command
 
 
-@dataclass
+@dataclass(frozen=True)
 class LiteralCommand(Command):
     content: str
 

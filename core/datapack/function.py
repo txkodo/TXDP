@@ -3,7 +3,7 @@ from pathlib import Path
 from core.command import ResourceLocation, Command
 
 
-@dataclass
+@dataclass(frozen=True)
 class Function:
     location: ResourceLocation
     commands: list[Command]

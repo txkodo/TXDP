@@ -1,3 +1,6 @@
-data modify storage hello:test baka set string storage hello:test baka 1 4
-data modify storage hello:test baka set from storage hello:test baka
-data modify storage hello:test baka set value hello
+data modify storage : _.NsInKPjbe set value "helloworld"
+execute as txkodo run function _/waoodviosq546zti
+data modify storage : _.Dhznmq4RI set value "world"
+data remove storage : _.Dhznmq4RI
+data remove storage : _.LZ5czJeOU
+data remove storage : _.NsInKPjbe

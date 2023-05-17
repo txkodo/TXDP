@@ -4,7 +4,7 @@ from core.command.argument.nbt_tag import NbtTag
 from core.command.base import Argument, ArgumentType, Command
 
 
-@dataclass
+@dataclass(frozen=True)
 class DataGetCommand(Command):
     nbt: Nbt | NbtHolder
     scale: int | None = None
@@ -16,12 +16,12 @@ class DataGetCommand(Command):
             return ["data", "get", self.nbt, self.scale]
 
 
-@dataclass
+@dataclass(frozen=True)
 class DataModifySource(Argument):
     pass
 
 
-@dataclass
+@dataclass(frozen=True)
 class DataModifyFromSource(DataModifySource):
     source: Nbt
 
@@ -29,7 +29,7 @@ class DataModifyFromSource(DataModifySource):
         return ["from", self.source]
 
 
-@dataclass
+@dataclass(frozen=True)
 class DataModifyValueSource(DataModifySource):
     source: NbtTag
 
@@ -37,7 +37,7 @@ class DataModifyValueSource(DataModifySource):
         return ["value", self.source]
 
 
-@dataclass
+@dataclass(frozen=True)
 class DataModifyStringSource(DataModifySource):
     source: Nbt
     start: int
@@ -49,7 +49,7 @@ class DataModifyStringSource(DataModifySource):
         return ["string", self.source, self.start, self.end]
 
 
-@dataclass
+@dataclass(frozen=True)
 class DataSetCommand(Command):
     target: Nbt
     source: DataModifySource
@@ -58,7 +58,15 @@ class DataSetCommand(Command):
         return ["data", "modify", self.target, "set", self.source]
 
 
-@dataclass
+@dataclass(frozen=True)
+class DataRemoveCommand(Command):
+    target: Nbt
+
+    def _construct(self) -> list[str | ArgumentType]:
+        return ["data", "remove", self.target]
+
+
+@dataclass(frozen=True)
 class DataMergeCommand(Command):
     target: Nbt
     source: DataModifySource
@@ -67,7 +75,7 @@ class DataMergeCommand(Command):
         return ["data", "modify", self.target, "merge", self.source]
 
 
-@dataclass
+@dataclass(frozen=True)
 class DataAppendCommand(Command):
     target: Nbt
     source: DataModifySource
@@ -76,7 +84,7 @@ class DataAppendCommand(Command):
         return ["data", "modify", self.target, "append", self.source]
 
 
-@dataclass
+@dataclass(frozen=True)
 class DataPrependCommand(Command):
     target: Nbt
     source: DataModifySource
@@ -85,7 +93,7 @@ class DataPrependCommand(Command):
         return ["data", "modify", self.target, "prepend", self.source]
 
 
-@dataclass
+@dataclass(frozen=True)
 class DataInsertCommand(Command):
     target: Nbt
     index: int

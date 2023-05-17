@@ -4,7 +4,7 @@ from typing import ClassVar
 from core.command.base import Argument, ArgumentType
 
 
-@dataclass
+@dataclass(frozen=True)
 class PosNotation(Argument, metaclass=ABCMeta):
     value: float
     prefix: ClassVar[str]
@@ -28,7 +28,7 @@ class CaretPosNotation(PosNotation):
     prefix = "^"
 
 
-@dataclass
+@dataclass(frozen=True)
 class BlockPos(Argument, metaclass=ABCMeta):
     x: PosNotation
     y: PosNotation
@@ -38,14 +38,14 @@ class BlockPos(Argument, metaclass=ABCMeta):
         return [self.x, self.y, self.z]
 
 
-@dataclass
+@dataclass(frozen=True)
 class TildeBlockPos:
     x: AbsPosNotation | TildePosNotation
     y: AbsPosNotation | TildePosNotation
     z: AbsPosNotation | TildePosNotation
 
 
-@dataclass
+@dataclass(frozen=True)
 class CaretBlockPos:
     x: CaretPosNotation
     y: CaretPosNotation
