@@ -9,7 +9,7 @@ namespaceChars = set(string.ascii_lowercase + string.digits + "_-.")
 pathChars = set(string.ascii_lowercase + string.digits + "_-./")
 
 
-@dataclass
+@dataclass(frozen=True)
 class ResourceLocation(Argument):
     namespace: str
     path: str
@@ -27,20 +27,20 @@ class ResourceLocation(Argument):
             match path.split(":"):
                 case []:
                     pass
-                case [path]:
-                    self.namespace = "minecraft"
-                    self.path = path
-                case ["", path]:
-                    self.namespace = "minecraft"
-                    self.path = path
-                case [namespace, path]:
-                    self.namespace = namespace
-                    self.path = path
+                case [_path]:
+                    path = _path
+                    namespace = "minecraft"
+                case ["", _path]:
+                    path = _path
+                    namespace = "minecraft"
+                case [_namespace, _path]:
+                    namespace = _namespace
+                    path = _path
                 case _:
                     raise ValueError(path)
-        else:
-            self.namespace = namespace
-            self.path = path
+
+        object.__setattr__(self, "namespace", namespace)
+        object.__setattr__(self, "path", path)
 
         assert all(map(lambda x: x in namespaceChars, self.namespace))
         assert all(map(lambda x: x in pathChars, self.path))

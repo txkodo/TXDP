@@ -3,8 +3,5 @@ from core.command.base import Argument
 
 
 @dataclass(frozen=True)
-class Player(Argument):
+class PlayerArgument(Argument):
     name: str
-
-    def __str__(self) -> str:
-        return self.name

@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import dataclasses
 from typing import ClassVar, Generic, Literal, TypeVar, overload
-from core.command.argument.nbt_tag import NbtCompoundTag
+from core.command.argument.nbt_tag import NbtCompoundTagArgument
 from core.command.argument.resource_location import ResourceLocation
 from core.command.base import Argument
 
@@ -59,7 +59,7 @@ class FloatRange(IRange[float]):
 
 
 @dataclass(frozen=True)
-class TargetSelector(Argument):
+class TargetSelectorArgument(Argument):
     _selector: Literal["self", "player", "entity"]
     _sort: Sort | None = None
     _limit: int | None = INTMAX
@@ -69,7 +69,7 @@ class TargetSelector(Argument):
     _teams: dict[str, bool] | bool = field(default_factory=dict)
     _types: dict[str, bool] = field(default_factory=dict)
     _tags: dict[str, bool] | bool = field(default_factory=dict)
-    _nbt: NbtCompoundTag | None = None
+    _nbt: NbtCompoundTagArgument | None = None
     _scores: dict[str, IntRange] = field(default_factory=dict)
     _advancements: Advancements = field(default_factory=dict)
     _predicates: dict[ResourceLocation, bool] = field(default_factory=dict)
@@ -85,7 +85,7 @@ class TargetSelector(Argument):
     _distance: FloatRange | None = None
 
     @overload
-    def _replace(self) -> TargetSelector:
+    def _replace(self) -> TargetSelectorArgument:
         pass
 
     @overload
@@ -97,7 +97,7 @@ class TargetSelector(Argument):
         _teams: dict[str, bool] | bool | None = None,
         _types: dict[str, bool] | None = None,
         _tags: dict[str, bool] | bool | None = None,
-        _nbt: NbtCompoundTag | None = None,
+        _nbt: NbtCompoundTagArgument | None = None,
         _scores: dict[str, IntRange] | None = None,
         _advancements: Advancements | None = None,
         _predicates: dict[ResourceLocation, bool] | None = None,
@@ -113,7 +113,7 @@ class TargetSelector(Argument):
         _distance: FloatRange | None = None,
         _sort: Sort | None = None,
         _limit: int | None = None,
-    ) -> TargetSelector:
+    ) -> TargetSelectorArgument:
         pass
 
     def _replace(self, **kwarg):
@@ -231,11 +231,11 @@ class TargetSelector(Argument):
             return "@" + selector + "[" + ",".join(k + "=" + v for k, v in selectors) + "]"
         return "@" + selector
 
-    s: ClassVar[TargetSelector]
-    e: ClassVar[TargetSelector]
-    p: ClassVar[TargetSelector]
-    r: ClassVar[TargetSelector]
-    a: ClassVar[TargetSelector]
+    s: ClassVar[TargetSelectorArgument]
+    e: ClassVar[TargetSelectorArgument]
+    p: ClassVar[TargetSelectorArgument]
+    r: ClassVar[TargetSelectorArgument]
+    a: ClassVar[TargetSelectorArgument]
 
     def name(self, name: str | None):
         if self._name is not None:
@@ -277,7 +277,7 @@ class TargetSelector(Argument):
         return self._replace(_tags=self._tags | {tag: enable})
 
     # TODO: NBTのマージ
-    def nbt(self, value: NbtCompoundTag | None):
+    def nbt(self, value: NbtCompoundTagArgument | None):
         if self._nbt is not None:
             raise ValueError
         return self._replace(_nbt=value)
@@ -369,12 +369,12 @@ class TargetSelector(Argument):
         return self._replace(_limit=limit)
 
 
-TargetSelector.s = TargetSelector("self", _sort=None, _limit=None)
+TargetSelectorArgument.s = TargetSelectorArgument("self", _sort=None, _limit=None)
 
-TargetSelector.a = TargetSelector("player", _sort="arbitrary", _limit=INTMAX)
+TargetSelectorArgument.a = TargetSelectorArgument("player", _sort="arbitrary", _limit=INTMAX)
 
-TargetSelector.p = TargetSelector("player", _sort="nearest", _limit=1)
+TargetSelectorArgument.p = TargetSelectorArgument("player", _sort="nearest", _limit=1)
 
-TargetSelector.r = TargetSelector("player", _sort="random", _limit=1)
+TargetSelectorArgument.r = TargetSelectorArgument("player", _sort="random", _limit=1)
 
-TargetSelector.e = TargetSelector("entity", _sort="arbitrary")
+TargetSelectorArgument.e = TargetSelectorArgument("entity", _sort="arbitrary")

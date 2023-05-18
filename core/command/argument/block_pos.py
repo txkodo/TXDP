@@ -5,7 +5,7 @@ from core.command.base import Argument, ArgumentType
 
 
 @dataclass(frozen=True)
-class PosNotation(Argument, metaclass=ABCMeta):
+class PosNotationArgument(Argument, metaclass=ABCMeta):
     value: float
     prefix: ClassVar[str]
 
@@ -13,40 +13,37 @@ class PosNotation(Argument, metaclass=ABCMeta):
         return f"{self.prefix}{self.value}"
 
 
-class AbsPosNotation(PosNotation):
+class AbsPosNotationArgument(PosNotationArgument):
     value: float
     prefix = ""
 
 
-class TildePosNotation(PosNotation):
+class TildePosNotationArgument(PosNotationArgument):
     value: float
     prefix = "~"
 
 
-class CaretPosNotation(PosNotation):
+class CaretPosNotationArgument(PosNotationArgument):
     value: float
     prefix = "^"
 
 
 @dataclass(frozen=True)
-class BlockPos(Argument, metaclass=ABCMeta):
-    x: PosNotation
-    y: PosNotation
-    z: PosNotation
-
-    def _construct(self) -> list[ArgumentType]:
-        return [self.x, self.y, self.z]
+class BlockPosArgument(Argument, metaclass=ABCMeta):
+    x: PosNotationArgument
+    y: PosNotationArgument
+    z: PosNotationArgument
 
 
 @dataclass(frozen=True)
-class TildeBlockPos:
-    x: AbsPosNotation | TildePosNotation
-    y: AbsPosNotation | TildePosNotation
-    z: AbsPosNotation | TildePosNotation
+class TildeBlockPosArgument(BlockPosArgument):
+    x: AbsPosNotationArgument | TildePosNotationArgument
+    y: AbsPosNotationArgument | TildePosNotationArgument
+    z: AbsPosNotationArgument | TildePosNotationArgument
 
 
 @dataclass(frozen=True)
-class CaretBlockPos:
-    x: CaretPosNotation
-    y: CaretPosNotation
-    z: CaretPosNotation
+class CaretBlockPosArgument(BlockPosArgument):
+    x: CaretPosNotationArgument
+    y: CaretPosNotationArgument
+    z: CaretPosNotationArgument

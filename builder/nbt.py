@@ -1,27 +1,30 @@
 from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import ClassVar, Generic, Protocol, TypeVar, overload, runtime_checkable
+from typing import ClassVar, Generic, Literal, Protocol, TypeVar, overload, runtime_checkable
+from builder.funcstack import Run
+from builder.store_target import StoreTarget
 from builder.varstack import VarStack
-from core.command.argument.nbt import Nbt
+from core.command.argument.nbt import NbtArgument
 from core.command.argument.nbt_tag import (
-    NbtByteArrayTag,
-    NbtByteTag,
-    NbtCompoundTag,
-    NbtDoubleTag,
-    NbtFloatTag,
-    NbtIntArrayTag,
-    NbtIntTag,
-    NbtListTag,
-    NbtLongTag,
-    NbtShortTag,
-    NbtStringTag,
-    NbtTag,
+    NbtByteArrayTagArgument,
+    NbtByteTagArgument,
+    NbtCompoundTagArgument,
+    NbtDoubleTagArgument,
+    NbtFloatTagArgument,
+    NbtIntArrayTagArgument,
+    NbtIntTagArgument,
+    NbtListTagArgument,
+    NbtLongTagArgument,
+    NbtShortTagArgument,
+    NbtStringTagArgument,
+    NbtTagArgument,
 )
-from core.command.argument.resource_location import ResourceLocation
+from core.command.argument.storeable import NbtStoreableArgument, StoreableArgument
 from core.command.base import Command
 from core.command.command.data import (
     DataAppendCommand,
+    DataGetCommand,
     DataInsertCommand,
     DataMergeCommand,
     DataModifyFromSource,
@@ -37,30 +40,34 @@ P = TypeVar("P")
 
 
 class NbtBase(Generic[P]):
-    tag: ClassVar[type[NbtTag]]
-    nbt: Nbt
+    _tag: ClassVar[type[NbtTagArgument]]
+    nbt: NbtArgument
 
-    @staticmethod
-    def Run(command: Command):
-        pass
+    @property
+    def Value(self):
+        return self
+
+    @Value.setter
+    def Value(self, value: NbtSourceProtocol[T] | P):
+        self.Set(value)
 
     @classmethod
-    def new(cls: type[T], value: NbtSourceProtocol[T] | P) -> T:
+    def New(cls: type[T], value: NbtSourceProtocol[T] | P) -> T:
         result = cls()
-        cls.Run(result.Set(value))
+        Run(result.set_command(value))
         return result
 
     @overload
-    def __new__(cls: type[T], value: Nbt | None = None) -> T:
+    def __new__(cls: type[T], value: NbtArgument | None = None) -> T:
         pass
 
     @overload
     def __new__(cls: type[T], value: P) -> Value[T]:
         pass
 
-    def __new__(cls, value: P | Nbt | None = None):
+    def __new__(cls, value: P | NbtArgument | None = None):
         match value:
-            case Nbt():
+            case NbtArgument():
                 result = super().__new__(cls)
                 result.nbt = value
                 return result
@@ -70,7 +77,7 @@ class NbtBase(Generic[P]):
                 VarStack.add(id)
                 return result
             case _:
-                return Value(cls.tag(value))  # type: ignore
+                return Value(cls._tag(value))  # type: ignore
 
     def __hash__(self) -> int:
         return hash(self.nbt)
@@ -78,22 +85,33 @@ class NbtBase(Generic[P]):
     def toSource(self: T) -> NbtSource[T]:
         return NbtSource(DataModifyFromSource(self.nbt))
 
-    def Set(self: T, value: NbtSourceProtocol[T] | P):
+    def set_command(self: T, value: NbtSourceProtocol[T] | P):
         if isinstance(value, NbtSourceProtocol):
             return DataSetCommand(self.nbt, value.toSource().source)
         else:
-            return DataSetCommand(self.nbt, DataModifyValueSource(type(self).tag(value)))
+            return DataSetCommand(self.nbt, DataModifyValueSource(type(self)._tag(value)))
+
+    def Set(self: T, value: NbtSourceProtocol[T] | P):
+        Run(self.set_command(value))
+
+    def remove_command(self):
+        return DataRemoveCommand(self.nbt)
 
     def Remove(self):
-        return DataRemoveCommand(self.nbt)
+        Run(self.remove_command())
+
+    def get_command(self, scale: float | None = None):
+        return DataGetCommand(self.nbt, scale)
+
+    def Get(self, scale: float | None = None):
+        Run(self.get_command(scale))
 
 
 T = TypeVar("T", bound=NbtBase)
 
 
-@dataclass(frozen=True)
 class Value(Generic[T]):
-    value: NbtTag
+    value: NbtTagArgument
 
     def toSource(self) -> NbtSource[T]:
         return NbtSource(DataModifyValueSource(self.value))
@@ -111,32 +129,58 @@ class NbtSourceProtocol(Protocol, Generic[T]):
         pass
 
 
-class Byte(NbtBase[int]):
-    tag = NbtByteTag
+class NbtNumerable(StoreTarget, NbtBase[P]):
+    _store_type: Literal["byte", "short", "int", "long", "float", "double"]
+
+    def _store_target(self) -> StoreableArgument:
+        return NbtStoreableArgument(self.nbt, self._store_type, 1)
+
+    def store(self, scale: float) -> NbtNumerableStoreTarget:
+        return NbtNumerableStoreTarget(self.nbt, self._store_type, scale)
 
 
-class Short(NbtBase[int]):
-    tag = NbtShortTag
+@dataclass(frozen=True)
+class NbtNumerableStoreTarget(StoreTarget):
+    nbt: NbtArgument
+    store_type: Literal["byte", "short", "int", "long", "float", "double"]
+    scale: float
+
+    def _store_target(self) -> StoreableArgument:
+        return NbtStoreableArgument(self.nbt, self.store_type, self.scale)
 
 
-class Int(NbtBase[int]):
-    tag = NbtIntTag
+class Byte(NbtNumerable[int]):
+    _store_type = "byte"
+    _tag = NbtByteTagArgument
 
 
-class Long(NbtBase[int]):
-    tag = NbtLongTag
+class Short(NbtNumerable[int]):
+    _store_type = "short"
+    _tag = NbtShortTagArgument
 
 
-class Float(NbtBase[float]):
-    tag = NbtFloatTag
+class Int(NbtNumerable[int]):
+    _store_type = "int"
+    _tag = NbtIntTagArgument
 
 
-class Double(NbtBase[float]):
-    tag = NbtDoubleTag
+class Long(NbtNumerable[int]):
+    _store_type = "long"
+    _tag = NbtLongTagArgument
+
+
+class Float(NbtNumerable[float]):
+    _store_type = "float"
+    _tag = NbtFloatTagArgument
+
+
+class Double(NbtNumerable[float]):
+    _store_type = "double"
+    _tag = NbtDoubleTagArgument
 
 
 class String(NbtBase[str]):
-    tag = NbtStringTag
+    _tag = NbtStringTagArgument
 
     def slice(self, start: int, end: int | None = None):
         return SubString(self.nbt, start, end)
@@ -144,7 +188,7 @@ class String(NbtBase[str]):
 
 @dataclass(frozen=True)
 class SubString:
-    nbt: Nbt
+    nbt: NbtArgument
     start: int
     end: int | None = None
 
@@ -152,41 +196,53 @@ class SubString:
         return NbtSource(DataModifyStringSource(self.nbt, self.start, self.end))
 
 
-class Compound(NbtBase[dict[str, NbtTag]]):
-    tag = NbtCompoundTag
+class Compound(NbtBase[dict[str, NbtTagArgument]]):
+    _tag = NbtCompoundTagArgument
+
+    def merge_command(self, item: NbtSourceProtocol[Compound]):
+        return DataMergeCommand(self.nbt, item.toSource().source)
 
     def Merge(self, item: NbtSourceProtocol[Compound]):
-        return DataMergeCommand(self.nbt, item.toSource().source)
+        Run(self.merge_command(item))
 
 
 class _ArrayLike(NbtBase[list[Value[T]]]):
     _generic: ClassVar[type[NbtBase]]
-    _tag: type[NbtTag]
+    _generic_tag: type[NbtTagArgument]
 
     @classmethod
     def tag(cls, value: list[Value[T]]):
-        return cls._tag([i.value for i in value])
+        return cls._generic_tag([i.value for i in value])
 
-    def Append(self, item: NbtSourceProtocol[T]):
+    def append_command(self, item: NbtSourceProtocol[T]):
         return DataAppendCommand(self.nbt, item.toSource().source)
 
-    def Prepend(self, item: NbtSourceProtocol[T]):
+    def prepend_command(self, item: NbtSourceProtocol[T]):
         return DataPrependCommand(self.nbt, item.toSource().source)
 
-    def Insert(self, index: int, item: NbtSourceProtocol[T]):
+    def insert_command(self, index: int, item: NbtSourceProtocol[T]):
         return DataInsertCommand(self.nbt, index, item.toSource().source)
+
+    def Append(self, item: NbtSourceProtocol[T]):
+        Run(self.append_command(item))
+
+    def Prepen(self, item: NbtSourceProtocol[T]):
+        Run(self.prepend_command(item))
+
+    def Insert(self, index: int, item: NbtSourceProtocol[T]):
+        Run(self.insert_command(index, item))
 
     def __getitem__(self, index) -> T:
         return self._generic(self.nbt.item(index))  # type: ignore
 
 
 class ByteArray(_ArrayLike[Byte]):
-    _tag: NbtByteArrayTag
+    _generic_tag: NbtByteArrayTagArgument
     _generic: Byte
 
 
 class IntArray(_ArrayLike[Int]):
-    _tag: NbtIntArrayTag
+    _generic_tag: NbtIntArrayTagArgument
     _generic: Int
 
 
@@ -199,8 +255,8 @@ class ListMeta(type):
 
 
 class List(_ArrayLike[T], metaclass=ListMeta):
-    _tag: NbtListTag
+    _generic_tag: NbtListTagArgument
 
     @classmethod
     def tag(cls, value: list[Value[T]]):
-        return NbtListTag([i.value for i in value])
+        return NbtListTagArgument([i.value for i in value])

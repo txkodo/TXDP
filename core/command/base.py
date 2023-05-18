@@ -1,13 +1,16 @@
 from __future__ import annotations
 from abc import ABCMeta
+import dataclasses
+from typing import Iterable
 
 
-class Argument(metaclass=ABCMeta):
+@dataclasses.dataclass(frozen=True)
+class Argument:
     def __str__(self) -> str:
         return " ".join(map(str, self._construct()))
 
-    def _construct(self) -> list[str | ArgumentType]:
-        raise NotImplementedError(self.__class__)
+    def _construct(self) -> Iterable[str | ArgumentType]:
+        return (getattr(self, field.name) for field in dataclasses.fields(self))
 
 
 class Command(Argument, metaclass=ABCMeta):

@@ -1,15 +1,15 @@
 import random
 import string
-from core.command.argument.nbt import Nbt, NbtAttrSegment, NbtRoot, NbtRootSegment, StorageNbt
-from core.command.argument.resource_location import ResourceLocation
+from builder.const import SYS_STORAGE_ATTR, SYS_STORAGE_NAMESPACE
+from core.command.argument.nbt import NbtArgument, NbtAttrSegment, NbtRootArgument, NbtRootSegment, StorageNbtArgument
 from core.command.command.data import DataRemoveCommand
 
 
 class VarStack:
-    holer = StorageNbt(ResourceLocation("minecraft:"))
-    root = NbtRootSegment("_")
-    scope = NbtRoot(holer, (root,))
-    stack: list[set[str]] = []
+    holder = StorageNbtArgument(SYS_STORAGE_NAMESPACE)
+    root = NbtRootSegment(SYS_STORAGE_ATTR)
+    scope = NbtRootArgument(holder, (root,))
+    stack: list[set[str]] = [set()]
 
     @classmethod
     def provide(cls):
@@ -25,10 +25,10 @@ class VarStack:
         cls.stack.append(set())
 
     @classmethod
-    def collect(cls, carry: set[Nbt]):
+    def collect(cls, carry: set[NbtArgument]):
         carryids: set[str] = set()
         for c in carry:
-            if c.holder == cls.holer and c.segments[0] == cls.root:
+            if c.holder == cls.holder and c.segments[0] == cls.root:
                 assert isinstance(c.segments[1], NbtAttrSegment)
                 id = c.segments[1].attr
                 carryids.add(id)

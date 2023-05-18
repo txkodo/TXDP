@@ -1,7 +1,7 @@
 from typing import TypeAlias
-from core.command.argument.player import Player
-from core.command.argument.selector import TargetSelector
+from core.command.argument.player import PlayerArgument
+from core.command.argument.selector import TargetSelectorArgument
 
-from core.command.argument.uuid import UUID
+from core.command.argument.uuid import UUIDArgument
 
-Entity: TypeAlias = Player | UUID | TargetSelector
+EntityArgument: TypeAlias = PlayerArgument | UUIDArgument | TargetSelectorArgument

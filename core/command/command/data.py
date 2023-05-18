@@ -1,13 +1,13 @@
 from dataclasses import dataclass
-from core.command.argument.nbt import Nbt, NbtHolder
-from core.command.argument.nbt_tag import NbtTag
+from core.command.argument.nbt import NbtArgument, NbtHolderArgument
+from core.command.argument.nbt_tag import NbtTagArgument
 from core.command.base import Argument, ArgumentType, Command
 
 
 @dataclass(frozen=True)
 class DataGetCommand(Command):
-    nbt: Nbt | NbtHolder
-    scale: int | None = None
+    nbt: NbtArgument | NbtHolderArgument
+    scale: float | None = None
 
     def _construct(self) -> list[str | ArgumentType]:
         if self.scale is None:
@@ -23,7 +23,7 @@ class DataModifySource(Argument):
 
 @dataclass(frozen=True)
 class DataModifyFromSource(DataModifySource):
-    source: Nbt
+    source: NbtArgument
 
     def _construct(self) -> list[ArgumentType]:
         return ["from", self.source]
@@ -31,7 +31,7 @@ class DataModifyFromSource(DataModifySource):
 
 @dataclass(frozen=True)
 class DataModifyValueSource(DataModifySource):
-    source: NbtTag
+    source: NbtTagArgument
 
     def _construct(self) -> list[ArgumentType]:
         return ["value", self.source]
@@ -39,7 +39,7 @@ class DataModifyValueSource(DataModifySource):
 
 @dataclass(frozen=True)
 class DataModifyStringSource(DataModifySource):
-    source: Nbt
+    source: NbtArgument
     start: int
     end: int | None = None
 
@@ -51,7 +51,7 @@ class DataModifyStringSource(DataModifySource):
 
 @dataclass(frozen=True)
 class DataSetCommand(Command):
-    target: Nbt
+    target: NbtArgument
     source: DataModifySource
 
     def _construct(self) -> list[str | ArgumentType]:
@@ -60,7 +60,7 @@ class DataSetCommand(Command):
 
 @dataclass(frozen=True)
 class DataRemoveCommand(Command):
-    target: Nbt
+    target: NbtArgument
 
     def _construct(self) -> list[str | ArgumentType]:
         return ["data", "remove", self.target]
@@ -68,7 +68,7 @@ class DataRemoveCommand(Command):
 
 @dataclass(frozen=True)
 class DataMergeCommand(Command):
-    target: Nbt
+    target: NbtArgument
     source: DataModifySource
 
     def _construct(self) -> list[str | ArgumentType]:
@@ -77,7 +77,7 @@ class DataMergeCommand(Command):
 
 @dataclass(frozen=True)
 class DataAppendCommand(Command):
-    target: Nbt
+    target: NbtArgument
     source: DataModifySource
 
     def _construct(self) -> list[str | ArgumentType]:
@@ -86,7 +86,7 @@ class DataAppendCommand(Command):
 
 @dataclass(frozen=True)
 class DataPrependCommand(Command):
-    target: Nbt
+    target: NbtArgument
     source: DataModifySource
 
     def _construct(self) -> list[str | ArgumentType]:
@@ -95,7 +95,7 @@ class DataPrependCommand(Command):
 
 @dataclass(frozen=True)
 class DataInsertCommand(Command):
-    target: Nbt
+    target: NbtArgument
     index: int
     source: DataModifySource
 

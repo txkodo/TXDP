@@ -5,7 +5,7 @@ from core.command.base import Argument
 
 
 @dataclass(frozen=True)
-class NbtTag(Argument):
+class NbtTagArgument(Argument):
     value: Any
 
     def __str__(self) -> str:
@@ -13,7 +13,7 @@ class NbtTag(Argument):
 
 
 @dataclass(frozen=True)
-class NbtByteTag(NbtTag):
+class NbtByteTagArgument(NbtTagArgument):
     value: int
 
     def __str__(self) -> str:
@@ -21,7 +21,7 @@ class NbtByteTag(NbtTag):
 
 
 @dataclass(frozen=True)
-class NbtShortTag(NbtTag):
+class NbtShortTagArgument(NbtTagArgument):
     value: int
 
     def __str__(self) -> str:
@@ -29,7 +29,7 @@ class NbtShortTag(NbtTag):
 
 
 @dataclass(frozen=True)
-class NbtIntTag(NbtTag):
+class NbtIntTagArgument(NbtTagArgument):
     value: int
 
     def __str__(self) -> str:
@@ -37,7 +37,7 @@ class NbtIntTag(NbtTag):
 
 
 @dataclass(frozen=True)
-class NbtLongTag(NbtTag):
+class NbtLongTagArgument(NbtTagArgument):
     value: int
 
     def __str__(self) -> str:
@@ -45,7 +45,7 @@ class NbtLongTag(NbtTag):
 
 
 @dataclass(frozen=True)
-class NbtFloatTag(NbtTag):
+class NbtFloatTagArgument(NbtTagArgument):
     value: float
 
     def __str__(self) -> str:
@@ -53,7 +53,7 @@ class NbtFloatTag(NbtTag):
 
 
 @dataclass(frozen=True)
-class NbtDoubleTag(NbtTag):
+class NbtDoubleTagArgument(NbtTagArgument):
     value: float
 
     def __str__(self) -> str:
@@ -65,7 +65,7 @@ def needQuoted(s):
 
 
 @dataclass(frozen=True)
-class NbtStringTag(NbtTag):
+class NbtStringTagArgument(NbtTagArgument):
     value: str
 
     def __str__(self) -> str:
@@ -78,26 +78,26 @@ class NbtStringTag(NbtTag):
 
 
 @dataclass(frozen=True)
-class NbtByteArrayTag(NbtTag):
-    value: list[NbtByteTag]
+class NbtByteArrayTagArgument(NbtTagArgument):
+    value: list[NbtByteTagArgument]
 
     def __str__(self) -> str:
         return "[B;" + ",".join(str(v) for v in self.value) + "]"
 
 
 @dataclass(frozen=True)
-class NbtIntArrayTag(NbtTag):
-    value: list[NbtIntTag]
+class NbtIntArrayTagArgument(NbtTagArgument):
+    value: list[NbtIntTagArgument]
 
     def __str__(self) -> str:
         return "[I;" + ",".join(str(v) for v in self.value) + "]"
 
 
-T = TypeVar("T", bound=NbtTag)
+T = TypeVar("T", bound=NbtTagArgument)
 
 
 @dataclass(frozen=True)
-class NbtListTag(NbtTag, Generic[T]):
+class NbtListTagArgument(NbtTagArgument, Generic[T]):
     value: list[T]
 
     def __str__(self) -> str:
@@ -105,8 +105,8 @@ class NbtListTag(NbtTag, Generic[T]):
 
 
 @dataclass(frozen=True)
-class NbtCompoundTag(NbtTag):
-    value: dict[str, NbtTag]
+class NbtCompoundTagArgument(NbtTagArgument):
+    value: dict[str, NbtTagArgument]
 
     def __str__(self) -> str:
         return "{" + ",".join(k + ":" + str(v) for k, v in self.value.items()) + "}"
