@@ -1,72 +1,34 @@
+import inspect
+import math
 from pathlib import Path
+from types import GenericAlias
+from typing import get_args, get_origin
 from builder.execute_builder import Execute
 from builder.function_builder import McFunction
 from builder.function_stack import Run
 from builder.nbt import Int, List, String
+from builder.object.counter import Counter
 from builder.pack_builder import PackBuilder
 from builder.range import IntRange
 from builder.scoreboard import Score
+from core.command.argument.resource_location import ResourceLocation
+from core.command.command.function import FunctionCommand
 from core.command.command.literal import LiteralCommand
 
 
-# @McFunction()
-# def b(a: String):
-#     return String.New(a.slice(1, 4))
-
-
-# main = Score.New(100)
-
-
 @McFunction("test:t")
-def a():
-    # r = b.Call(String.New("nagaistring"))
+def a() -> None:
+    counter = Counter.New(10)
 
-    # (main.value // 12).value += 1
+    @McFunction()
+    def loop() -> None:
+        Run(LiteralCommand("say hello"))
+        counter.value -= 1
+        with Execute.If(counter != 0):
+            loop.Call()
 
-    # s = Score.New(100)
-    # Score.New(s)
-    # Score.New(Int.New(100))
-
-    # Execute.Store.Result(Int().store(0.5)).Run(r.get_command(2))
-
-    # hello = String.New("hello")
-
-    # array = List[String].New([String("hello")])
-
-    # Execute.If(hello == "hello").Run(LiteralCommand("say true"))
-    # Execute.If(array[0] == "hello").Run(LiteralCommand("say true"))
-    # Execute.If(hello == hello).Run(LiteralCommand("say true"))
-
-    log = LiteralCommand("say true")
-
-    score = Score.New(1)
-    other = Score.New(1)
-
-    Execute.If(score == 10).Run(log)
-    Execute.If(score < 10).Run(log)
-    Execute.If(score <= 10).Run(log)
-    Execute.If(score > 10).Run(log)
-    Execute.If(score >= 10).Run(log)
-
-    Execute.If(score == other).Run(log)
-    Execute.If(score < other).Run(log)
-    Execute.If(score <= other).Run(log)
-    Execute.If(score > other).Run(log)
-    Execute.If(score >= other).Run(log)
-
-    with Execute.If(score.Between(1, 100)):
-        Run(log)
-
-    Execute.Store.Result(score).Condition(score.Between(1, 100))
-
-    Run(log)
-
-    # with If(hello == "hello" and hello == "hello"):
-    #     pass
-    # with Else.IF(hello == "hello" and hello == "hello"):
-    #     pass
-    # with Else:
-    #     pass
+    with Execute.If(counter != 0):
+        loop.Call()
 
 
 PackBuilder.export(Path())

@@ -74,12 +74,13 @@ class ExecuteBuilder:
 
     def __enter__(self):
         self.func = FuncWithBuilder()
-        self.Run(self.func.call_command())
         self.func.__enter__()
 
     def __exit__(self, *args):
         assert self.func is not None
-        self.func.__exit__(*args)
+        command = self.func.__exit__(*args)
+        if command is not None:
+            self.Run(command)
 
     def append(self, sub: SubCommand):
         return ExecuteBuilder([*self.sub_commands, sub])

@@ -278,6 +278,9 @@ class Compound(NbtBase[dict[str, NbtTagArgument]]):
     def Merge(self, item: NbtSourceProtocol[Compound]):
         Run(self.merge_command(item))
 
+    def child(self, name: str, type: type[T]) -> T:
+        return type(self.nbt.attr(name))
+
 
 class _ArrayLike(NbtBase[list[Value[T]]]):
     _generic: ClassVar[type[NbtBase]]

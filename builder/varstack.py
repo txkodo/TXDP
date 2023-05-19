@@ -1,6 +1,6 @@
-import random
-import string
 from builder.const import SYS_STORAGE_ATTR, SYS_STORAGE_NAMESPACE
+from builder.idGen import nbtId
+from builder.nbt_provider import NbtProvider
 from core.command.argument.nbt import NbtArgument, NbtAttrSegment, NbtRootArgument, NbtRootSegment, StorageNbtArgument
 from core.command.command.data import DataRemoveCommand
 
@@ -13,7 +13,7 @@ class VarStack:
 
     @classmethod
     def provide(cls):
-        id = cls._id()
+        id = nbtId()
         return id, cls.scope.attr(id)
 
     @classmethod
@@ -35,7 +35,11 @@ class VarStack:
                 cls.stack[-1].remove(id)
         return [DataRemoveCommand(cls.scope.attr(id)) for id in cls.stack[-1].difference(carry)], carryids
 
-    @classmethod
-    def _id(cls):
-        characters = string.ascii_letters + string.digits
-        return "".join(random.choices(characters, k=9))
+
+def stack_provider():
+    id, nbt = VarStack.provide()
+    VarStack.add(id)
+    return nbt
+
+
+NbtProvider.push(stack_provider)
