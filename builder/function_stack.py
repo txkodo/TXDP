@@ -16,6 +16,10 @@ class FuncStack:
     def pop(cls):
         return cls.funcstack.pop(-1)
 
+    @classmethod
+    def append_init(cls, command: Command):
+        cls.funcstack[0].append(command)
+
 
 def Run(command: Command):
     FuncStack.append(command)

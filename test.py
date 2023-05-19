@@ -1,28 +1,46 @@
 from pathlib import Path
 from builder.execute_builder import Execute
 from builder.function_builder import McFunction
-from builder.nbt import Int, String
+from builder.nbt import Int, List, String
 from builder.pack_builder import PackBuilder
-from builder.scoreboard import Scoreboard
+from builder.scoreboard import Score
+from core.command.command.literal import LiteralCommand
 
 
-@McFunction()
-def b(a: String):
-    return String.New(a.slice(1, 4))
+# @McFunction()
+# def b(a: String):
+#     return String.New(a.slice(1, 4))
 
-main = Scoreboard.New(100)
+
+# main = Score.New(100)
+
 
 @McFunction("test:t")
 def a():
-    r = b.Call(String.New("nagaistring"))
+    # r = b.Call(String.New("nagaistring"))
 
-    main.Remove(1)
+    # (main.value // 12).value += 1
 
-    s = Scoreboard.New(100)
-    Scoreboard.New(s)
-    Scoreboard.New(Int.New(100))
+    # s = Score.New(100)
+    # Score.New(s)
+    # Score.New(Int.New(100))
 
-    Execute.Store.Result(Int().store(0.5)).Run(r.get_command(2))
+    # Execute.Store.Result(Int().store(0.5)).Run(r.get_command(2))
+
+    hello = String.New("hello")
+
+    array = List[String].New([String("hello")])
+
+    Execute.If(hello == "hello").Run(LiteralCommand("say true"))
+    Execute.If(array[0] == "hello").Run(LiteralCommand("say true"))
+    Execute.If(hello == hello).Run(LiteralCommand("say true"))
+
+    # with If(hello == "hello" and hello == "hello"):
+    #     pass
+    # with Else.IF(hello == "hello" and hello == "hello"):
+    #     pass
+    # with Else:
+    #     pass
 
 
 PackBuilder.export(Path())

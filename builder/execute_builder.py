@@ -1,14 +1,16 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from builder.condition import Condition
 from builder.function_builder import FuncWithBuilder
-from builder.funcstack import FuncStack
+from builder.function_stack import FuncStack
 from builder.store_target import StoreTarget
 from core.command.argument.block_pos import BlockPosArgument
+from core.command.argument.condition import ConditionArgument
 from core.command.argument.entity import EntityArgument
 from core.command.argument.storeable import StoreableArgument
 from core.command.base import Command, SubCommand
 from core.command.command.execute import ExecuteCommand
-from core.command.subcommand.main import AsSubCommand, AtSubCommand, OnSubCommand, StoreSubCommand
+from core.command.subcommand.main import AsSubCommand, AtSubCommand, ConditionSubCommand, OnSubCommand, StoreSubCommand
 
 
 @dataclass(frozen=True)
@@ -93,6 +95,12 @@ class ExecuteBuilder:
 
     def At(self, pos: BlockPosArgument):
         return self.append(AtSubCommand(pos))
+
+    def If(self, condition: Condition):
+        return self.append(ConditionSubCommand("if" if condition.positive else "unless", condition._condition()))
+
+    def Unless(self, condition: Condition):
+        return self.append(ConditionSubCommand("unless" if condition.positive else "if", condition._condition()))
 
     @property
     def On(self):

@@ -4,6 +4,7 @@ from core.command.argument.component import ComponentArgument
 from core.command.argument.objective import ObjectiveArgument, ObjectiveAllArgument
 from core.command.argument.objective_criteria import ObjectiveCriteriaArgument
 from core.command.argument.score_holder import ScoreHolderArgument
+from core.command.argument.scoreboard import ScoreboardArgument
 from core.command.base import ArgumentType, Command
 
 
@@ -43,68 +44,52 @@ class ScoreboardPlayersList(Command):
 
 @dataclass(frozen=True)
 class ScoreboardPlayersGet(Command):
-    target: ScoreHolderArgument
-    objective: ObjectiveArgument
+    score: ScoreboardArgument
 
     def _construct(self) -> Iterable[ArgumentType]:
-        return ["scoreboard", "players", "get", self.target, self.objective]
+        return ["scoreboard", "players", "get", self.score]
 
 
 @dataclass(frozen=True)
 class ScoreboardPlayersReset(Command):
-    target: ScoreHolderArgument
-    objective: ObjectiveArgument
+    score: ScoreboardArgument
 
     def _construct(self) -> Iterable[ArgumentType]:
-        return ["scoreboard", "players", "reset", self.target, self.objective]
+        return ["scoreboard", "players", "reset", self.score]
 
 
 @dataclass(frozen=True)
 class ScoreboardPlayersSet(Command):
-    target: ScoreHolderArgument
-    objective: ObjectiveArgument
+    score: ScoreboardArgument
     value: int
 
     def _construct(self) -> Iterable[ArgumentType]:
-        return ["scoreboard", "players", "set", self.target, self.objective, self.value]
+        return ["scoreboard", "players", "set", self.score, self.value]
 
 
 @dataclass(frozen=True)
 class ScoreboardPlayersAdd(Command):
-    target: ScoreHolderArgument
-    objective: ObjectiveArgument
+    score: ScoreboardArgument
     value: int
 
     def _construct(self) -> Iterable[ArgumentType]:
-        return ["scoreboard", "players", "add", self.target, self.objective, self.value]
+        return ["scoreboard", "players", "add", self.score, self.value]
 
 
 @dataclass(frozen=True)
 class ScoreboardPlayersRemove(Command):
-    target: ScoreHolderArgument
-    objective: ObjectiveArgument
+    score: ScoreboardArgument
     value: int
 
     def _construct(self) -> Iterable[ArgumentType]:
-        return ["scoreboard", "players", "remove", self.target, self.objective, self.value]
+        return ["scoreboard", "players", "remove", self.score, self.value]
 
 
 @dataclass(frozen=True)
 class ScoreboardPlayersOperation(Command):
-    targets: ScoreHolderArgument
-    target_objective: ObjectiveArgument | ObjectiveAllArgument
+    targets: ScoreboardArgument
     operation: Literal["=", "+=", "-=", "*=", "/=", "%=", "><", "<", ">"]
-    source: ScoreHolderArgument
-    source_objective: ObjectiveArgument | ObjectiveAllArgument
+    source: ScoreboardArgument
 
     def _construct(self) -> Iterable[ArgumentType]:
-        return [
-            "scoreboard",
-            "players",
-            "operation",
-            self.targets,
-            self.target_objective,
-            self.operation,
-            self.source,
-            self.source_objective,
-        ]
+        return ["scoreboard", "players", "operation", self.targets, self.operation, self.source]

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal
 from core.command.argument.block_pos import BlockPosArgument
+from core.command.argument.condition import ConditionArgument
 from core.command.argument.entity import EntityArgument
 from core.command.argument.storeable import StoreableArgument
 
@@ -38,3 +39,9 @@ class StoreSubCommand(SubCommand):
 
     def _construct(self) -> list[ArgumentType]:
         return ["store", self.mode, self.target]
+
+
+@dataclass(frozen=True)
+class ConditionSubCommand(SubCommand):
+    mode: Literal["if", "unless"]
+    condition: ConditionArgument

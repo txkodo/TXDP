@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from typing import Protocol
 from core.command.argument.storeable import StoreableArgument
 
 

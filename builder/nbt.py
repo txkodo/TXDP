@@ -2,10 +2,21 @@ from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import ClassVar, Generic, Literal, Protocol, TypeVar, overload, runtime_checkable
-from builder.funcstack import Run
+from builder.condition import Condition
+from builder.function_stack import Run
 from builder.store_target import StoreTarget
 from builder.varstack import VarStack
-from core.command.argument.nbt import NbtArgument
+from core.command.argument.condition import ConditionArgument, NbtConditionArgument
+from core.command.argument.nbt import (
+    NbtArgument,
+    NbtAttrSegment,
+    NbtMatchArgument,
+    NbtMatchSegment,
+    NbtRootArgument,
+    NbtRootMatchArgument,
+    NbtRootMatchSegment,
+    NbtRootSegment,
+)
 from core.command.argument.nbt_tag import (
     NbtByteArrayTagArgument,
     NbtByteTagArgument,
@@ -35,6 +46,8 @@ from core.command.command.data import (
     DataRemoveCommand,
     DataSetCommand,
 )
+from core.command.command.execute import ExecuteCommand
+from core.command.subcommand.main import ConditionSubCommand, StoreSubCommand
 
 P = TypeVar("P")
 
@@ -44,12 +57,13 @@ class NbtBase(Generic[P]):
     nbt: NbtArgument
 
     @property
-    def Value(self):
+    def value(self):
         return self
 
-    @Value.setter
-    def Value(self, value: NbtSourceProtocol[T] | P):
-        self.Set(value)
+    @value.setter
+    def value(self, value: NbtSourceProtocol[T] | P):
+        if self != value:
+            self.Set(value)
 
     @classmethod
     def New(cls: type[T], value: NbtSourceProtocol[T] | P) -> T:
@@ -85,6 +99,9 @@ class NbtBase(Generic[P]):
     def toSource(self: T) -> NbtSource[T]:
         return NbtSource(DataModifyFromSource(self.nbt))
 
+    def Copy(self):
+        return type(self).New(self)
+
     def set_command(self: T, value: NbtSourceProtocol[T] | P):
         if isinstance(value, NbtSourceProtocol):
             return DataSetCommand(self.nbt, value.toSource().source)
@@ -106,10 +123,65 @@ class NbtBase(Generic[P]):
     def Get(self, scale: float | None = None):
         Run(self.get_command(scale))
 
+    def _match_nbt(self, value: NbtSourceProtocol[T] | P):
+        if not isinstance(value, NbtSourceProtocol):
+            return self._match_nbt(type(self)(value))
+        if isinstance(value, Value):
+            copy = self.Copy()
+            match_nbt = getMatchNbt(copy.nbt, value.value)
+        else:
+            temp = type(self).New(value)
+            result = Byte()
+            Run(ExecuteCommand([StoreSubCommand("success", result._store_target())], temp.set_command(self)))
+            match_nbt = getMatchNbt(result.nbt, NbtByteTagArgument(0))
+        assert match_nbt is not None
+        return match_nbt
+
+    def Equal(self, value: NbtSourceProtocol[T] | P):
+        return NbtCondition(True, Byte(self._match_nbt(value)))
+
+    def Different(self, value: NbtSourceProtocol[T] | P):
+        return NbtCondition(False, Byte(self._match_nbt(value)))
+
+    def __eq__(self, value: NbtSourceProtocol[T] | P):
+        return self.Equal(value)
+
+    def __ne__(self, value: NbtSourceProtocol[T] | P):
+        return self.Different(value)
+
+    def Exists(self):
+        return NbtCondition(True, Byte(self.nbt))
+
+
+@dataclass(frozen=True)
+class NbtCondition(Condition):
+    nbt: Byte
+
+    def _condition(self) -> ConditionArgument:
+        return NbtConditionArgument(self.nbt.nbt)
+
+
+def getMatchNbt(nbt: NbtArgument, value: NbtTagArgument) -> NbtArgument | None:
+    holder = nbt.holder
+    segment = nbt.segments[-1]
+    other = nbt.segments[:-1]
+    match segment:
+        case NbtRootSegment(name):
+            segment = NbtRootMatchSegment(NbtCompoundTagArgument({name: value}))
+            return NbtRootMatchArgument(holder, (*other, segment))
+        case NbtAttrSegment(name):
+            match other[-1]:
+                case NbtRootSegment() | NbtAttrSegment():
+                    segment = NbtMatchSegment(NbtCompoundTagArgument({name: value}))
+                    return NbtMatchArgument(holder, (*other, segment))
+
+    return None
+
 
 T = TypeVar("T", bound=NbtBase)
 
 
+@dataclass
 class Value(Generic[T]):
     value: NbtTagArgument
 
@@ -211,7 +283,7 @@ class _ArrayLike(NbtBase[list[Value[T]]]):
     _generic_tag: type[NbtTagArgument]
 
     @classmethod
-    def tag(cls, value: list[Value[T]]):
+    def _tag(cls, value: list[Value[T]]):
         return cls._generic_tag([i.value for i in value])
 
     def append_command(self, item: NbtSourceProtocol[T]):
@@ -258,5 +330,5 @@ class List(_ArrayLike[T], metaclass=ListMeta):
     _generic_tag: NbtListTagArgument
 
     @classmethod
-    def tag(cls, value: list[Value[T]]):
+    def _tag(cls, value: list[Value[T]]):
         return NbtListTagArgument([i.value for i in value])

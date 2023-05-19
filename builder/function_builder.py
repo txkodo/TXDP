@@ -4,11 +4,11 @@ import random
 import string
 from typing import Callable, Generic, ParamSpec, TypeVar
 from builder.const import INIT_FUNC_LOCATION, SYS_FUNCTION_DIRECTORY
-from builder.funcstack import FuncStack, Run
+from builder.function_stack import FuncStack, Run
 from builder.nbt import NbtBase
 from builder.pack_builder import PackBuilder
 from builder.score_stack import ScoreStack
-from builder.scoreboard import Scoreboard
+from builder.scoreboard import Score
 from builder.varstack import VarStack
 from core.command.argument.resource_location import ResourceLocation
 from core.command.command.function import FunctionCommand
