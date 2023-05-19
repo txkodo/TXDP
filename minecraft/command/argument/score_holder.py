@@ -1,9 +1,9 @@
 from typing import TypeAlias
 from dataclasses import dataclass
-from core.command.argument.uuid import UUIDArgument
-from core.command.base import Argument
-from core.command.argument.player import PlayerArgument
-from core.command.argument.selector import TargetSelectorArgument
+from minecraft.command.argument.uuid import UUIDArgument
+from minecraft.command.base import Argument
+from minecraft.command.argument.player import PlayerArgument
+from minecraft.command.argument.selector import TargetSelectorArgument
 
 
 @dataclass(frozen=True)

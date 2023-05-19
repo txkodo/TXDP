@@ -7,7 +7,7 @@ from builder.nbt import Int, List, String
 from builder.pack_builder import PackBuilder
 from builder.range import IntRange
 from builder.scoreboard import Score
-from core.command.command.literal import LiteralCommand
+from minecraft.command.command.literal import LiteralCommand
 
 
 # @McFunction()

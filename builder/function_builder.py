@@ -13,10 +13,10 @@ from builder.pack_builder import PackBuilder
 from builder.score_stack import ScoreStack
 from builder.scoreboard import Score
 from builder.varstack import VarStack, stack_provider
-from core.command.argument.nbt import NbtArgument
-from core.command.argument.resource_location import ResourceLocation
-from core.command.command.function import FunctionCommand
-from core.datapack.function import Function
+from minecraft.command.argument.nbt import NbtArgument
+from minecraft.command.argument.resource_location import ResourceLocation
+from minecraft.command.command.function import FunctionCommand
+from minecraft.datapack.function import Function
 
 
 def getFuncLocation():

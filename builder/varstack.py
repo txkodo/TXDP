@@ -1,8 +1,8 @@
 from builder.const import SYS_STORAGE_ATTR, SYS_STORAGE_NAMESPACE
 from builder.idGen import nbtId
 from builder.nbt_provider import NbtProvider
-from core.command.argument.nbt import NbtArgument, NbtAttrSegment, NbtRootArgument, NbtRootSegment, StorageNbtArgument
-from core.command.command.data import DataRemoveCommand
+from minecraft.command.argument.nbt import NbtArgument, NbtAttrSegment, NbtRootArgument, NbtRootSegment, StorageNbtArgument
+from minecraft.command.command.data import DataRemoveCommand
 
 
 class VarStack:

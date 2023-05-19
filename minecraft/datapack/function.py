@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from core.command import ResourceLocation, Command
+from minecraft.command import ResourceLocation, Command
 
 
 @dataclass(frozen=True)

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import string
-from core.command.base import Argument
+from minecraft.command.base import Argument
 
 objective_chars = set(string.ascii_letters + string.digits + "_.+-")
 

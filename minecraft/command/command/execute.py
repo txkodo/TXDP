@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from core.command.base import ArgumentType, Command, IConditionSubCommand, SubCommand
+from minecraft.command.base import ArgumentType, Command, IConditionSubCommand, SubCommand
 
 
 @dataclass(frozen=True)

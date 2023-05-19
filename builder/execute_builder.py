@@ -4,13 +4,13 @@ from builder.condition import Condition
 from builder.function_builder import FuncWithBuilder
 from builder.function_stack import FuncStack
 from builder.store_target import StoreTarget
-from core.command.argument.block_pos import BlockPosArgument
-from core.command.argument.condition import ConditionArgument
-from core.command.argument.entity import EntityArgument
-from core.command.argument.storeable import StoreableArgument
-from core.command.base import Command, SubCommand
-from core.command.command.execute import ExecuteCommand, ExecuteConditionCommand
-from core.command.subcommand.main import AsSubCommand, AtSubCommand, ConditionSubCommand, OnSubCommand, StoreSubCommand
+from minecraft.command.argument.block_pos import BlockPosArgument
+from minecraft.command.argument.condition import ConditionArgument
+from minecraft.command.argument.entity import EntityArgument
+from minecraft.command.argument.storeable import StoreableArgument
+from minecraft.command.base import Command, SubCommand
+from minecraft.command.command.execute import ExecuteCommand, ExecuteConditionCommand
+from minecraft.command.subcommand.main import AsSubCommand, AtSubCommand, ConditionSubCommand, OnSubCommand, StoreSubCommand
 
 
 @dataclass(frozen=True)

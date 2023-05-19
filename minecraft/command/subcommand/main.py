@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from typing import Literal
-from core.command.argument.block_pos import BlockPosArgument
-from core.command.argument.condition import ConditionArgument
-from core.command.argument.entity import EntityArgument
-from core.command.argument.storeable import StoreableArgument
+from minecraft.command.argument.block_pos import BlockPosArgument
+from minecraft.command.argument.condition import ConditionArgument
+from minecraft.command.argument.entity import EntityArgument
+from minecraft.command.argument.storeable import StoreableArgument
 
-from core.command.base import ArgumentType, IConditionSubCommand, SubCommand
+from minecraft.command.base import ArgumentType, IConditionSubCommand, SubCommand
 
 
 @dataclass(frozen=True)

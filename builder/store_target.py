@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from core.command.argument.storeable import StoreableArgument
+from minecraft.command.argument.storeable import StoreableArgument
 
 
 class StoreTarget:

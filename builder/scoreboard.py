@@ -9,22 +9,22 @@ from builder.range import IntIngredient, IntRange
 from builder.nbt import NbtNumerable
 from builder.score_stack import ScoreStack
 from builder.store_target import StoreTarget
-from core.command.argument.component import ComponentArgument
-from core.command.argument.condition import (
+from minecraft.command.argument.component import ComponentArgument
+from minecraft.command.argument.condition import (
     ConditionArgument,
     ScoreCompareConditionArgument,
     ScoreMatchesConditionArgument,
 )
-from core.command.argument.int_range import IntRangeArgument
-from core.command.argument.objective import ObjectiveArgument
+from minecraft.command.argument.int_range import IntRangeArgument
+from minecraft.command.argument.objective import ObjectiveArgument
 
-from core.command.argument.objective_criteria import ObjectiveCriteriaArgument
-from core.command.argument.player import PlayerArgument
-from core.command.argument.score_holder import ScoreHolderArgument
-from core.command.argument.scoreboard import ScoreboardArgument
-from core.command.argument.storeable import ScoreStoreableArgument, StoreableArgument
-from core.command.command.execute import ExecuteCommand
-from core.command.command.scoreboard import (
+from minecraft.command.argument.objective_criteria import ObjectiveCriteriaArgument
+from minecraft.command.argument.player import PlayerArgument
+from minecraft.command.argument.score_holder import ScoreHolderArgument
+from minecraft.command.argument.scoreboard import ScoreboardArgument
+from minecraft.command.argument.storeable import ScoreStoreableArgument, StoreableArgument
+from minecraft.command.command.execute import ExecuteCommand
+from minecraft.command.command.scoreboard import (
     ScoreboardObjectivesAdd,
     ScoreboardObjectivesRemove,
     ScoreboardPlayersAdd,
@@ -34,7 +34,7 @@ from core.command.command.scoreboard import (
     ScoreboardPlayersReset,
     ScoreboardPlayersSet,
 )
-from core.command.subcommand.main import StoreSubCommand
+from minecraft.command.subcommand.main import StoreSubCommand
 
 
 @dataclass

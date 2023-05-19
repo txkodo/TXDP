@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from typing import Iterable, Literal
-from core.command.argument.component import ComponentArgument
-from core.command.argument.objective import ObjectiveArgument, ObjectiveAllArgument
-from core.command.argument.objective_criteria import ObjectiveCriteriaArgument
-from core.command.argument.score_holder import ScoreHolderArgument
-from core.command.argument.scoreboard import ScoreboardArgument
-from core.command.base import ArgumentType, Command
+from minecraft.command.argument.component import ComponentArgument
+from minecraft.command.argument.objective import ObjectiveArgument, ObjectiveAllArgument
+from minecraft.command.argument.objective_criteria import ObjectiveCriteriaArgument
+from minecraft.command.argument.score_holder import ScoreHolderArgument
+from minecraft.command.argument.scoreboard import ScoreboardArgument
+from minecraft.command.base import ArgumentType, Command
 
 
 @dataclass(frozen=True)

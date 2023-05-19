@@ -1,4 +1,4 @@
-from core.command.base import Command
+from minecraft.command.base import Command
 
 
 class FuncStack:

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import string
 from typing import overload
-from core.command.base import Argument
+from minecraft.command.base import Argument
 
 
 namespaceChars = set(string.ascii_lowercase + string.digits + "_-.")

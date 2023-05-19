@@ -1,5 +1,5 @@
 from typing import Callable
-from core.command.argument.nbt import NbtArgument
+from minecraft.command.argument.nbt import NbtArgument
 
 
 class NbtProvider:

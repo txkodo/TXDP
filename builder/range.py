@@ -2,9 +2,9 @@ from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass
 from builder.condition import Condition
-from core.command.argument.condition import ConditionArgument
+from minecraft.command.argument.condition import ConditionArgument
 
-from core.command.argument.int_range import IntRangeArgument
+from minecraft.command.argument.int_range import IntRangeArgument
 
 
 class IntIngredient:

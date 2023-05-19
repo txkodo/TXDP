@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from core.command.argument.nbt import NbtArgument, NbtHolderArgument
-from core.command.argument.nbt_tag import NbtTagArgument
-from core.command.base import Argument, ArgumentType, Command
+from minecraft.command.argument.nbt import NbtArgument, NbtHolderArgument
+from minecraft.command.argument.nbt_tag import NbtTagArgument
+from minecraft.command.base import Argument, ArgumentType, Command
 
 
 @dataclass(frozen=True)

@@ -2,9 +2,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import dataclasses
 from typing import ClassVar, Generic, Literal, TypeVar, overload
-from core.command.argument.nbt_tag import NbtCompoundTagArgument
-from core.command.argument.resource_location import ResourceLocation
-from core.command.base import Argument
+from minecraft.command.argument.nbt_tag import NbtCompoundTagArgument
+from minecraft.command.argument.resource_location import ResourceLocation
+from minecraft.command.base import Argument
 
 
 Gamemode = Literal["survival", "creative", "adventure", "spectator"]

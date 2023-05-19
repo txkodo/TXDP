@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 from shutil import rmtree
-from core.datapack.function import Function
+from minecraft.datapack.function import Function
 
 
 @dataclass(frozen=True)

@@ -6,8 +6,8 @@ from builder.condition import Condition
 from builder.function_stack import Run
 from builder.store_target import StoreTarget
 from builder.varstack import VarStack
-from core.command.argument.condition import ConditionArgument, NbtConditionArgument
-from core.command.argument.nbt import (
+from minecraft.command.argument.condition import ConditionArgument, NbtConditionArgument
+from minecraft.command.argument.nbt import (
     NbtArgument,
     NbtAttrSegment,
     NbtMatchArgument,
@@ -17,7 +17,7 @@ from core.command.argument.nbt import (
     NbtRootMatchSegment,
     NbtRootSegment,
 )
-from core.command.argument.nbt_tag import (
+from minecraft.command.argument.nbt_tag import (
     NbtByteArrayTagArgument,
     NbtByteTagArgument,
     NbtCompoundTagArgument,
@@ -31,9 +31,9 @@ from core.command.argument.nbt_tag import (
     NbtStringTagArgument,
     NbtTagArgument,
 )
-from core.command.argument.storeable import NbtStoreableArgument, StoreableArgument
-from core.command.base import Command
-from core.command.command.data import (
+from minecraft.command.argument.storeable import NbtStoreableArgument, StoreableArgument
+from minecraft.command.base import Command
+from minecraft.command.command.data import (
     DataAppendCommand,
     DataGetCommand,
     DataInsertCommand,
@@ -46,8 +46,8 @@ from core.command.command.data import (
     DataRemoveCommand,
     DataSetCommand,
 )
-from core.command.command.execute import ExecuteCommand
-from core.command.subcommand.main import ConditionSubCommand, StoreSubCommand
+from minecraft.command.command.execute import ExecuteCommand
+from minecraft.command.subcommand.main import ConditionSubCommand, StoreSubCommand
 
 P = TypeVar("P")
 

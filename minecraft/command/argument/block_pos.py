@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from dataclasses import dataclass
 from typing import ClassVar
-from core.command.base import Argument, ArgumentType
+from minecraft.command.base import Argument, ArgumentType
 
 
 @dataclass(frozen=True)

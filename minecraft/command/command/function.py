@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from core.command.argument.resource_location import ResourceLocation
-from core.command.base import ArgumentType, Command
+from minecraft.command.argument.resource_location import ResourceLocation
+from minecraft.command.base import ArgumentType, Command
 
 
 @dataclass(frozen=True)

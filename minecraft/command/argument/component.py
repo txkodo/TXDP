@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import json
 from typing import Any, TypeAlias
-from core.command.base import Argument
+from minecraft.command.base import Argument
 
 
 ComponentType: TypeAlias = str | int | float | dict[str, "ComponentType"] | list["ComponentType"]

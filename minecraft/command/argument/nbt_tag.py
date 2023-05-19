@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 
-from core.command.base import Argument
+from minecraft.command.base import Argument
 
 
 @dataclass(frozen=True)

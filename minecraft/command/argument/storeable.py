@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from typing import Iterable, Literal
-from core.command.argument.nbt import NbtArgument
-from core.command.argument.objective import ObjectiveArgument
-from core.command.argument.score_holder import ScoreHolderArgument
-from core.command.argument.scoreboard import ScoreboardArgument
-from core.command.base import Argument, ArgumentType
+from minecraft.command.argument.nbt import NbtArgument
+from minecraft.command.argument.objective import ObjectiveArgument
+from minecraft.command.argument.score_holder import ScoreHolderArgument
+from minecraft.command.argument.scoreboard import ScoreboardArgument
+from minecraft.command.base import Argument, ArgumentType
 
 
 @dataclass(frozen=True)

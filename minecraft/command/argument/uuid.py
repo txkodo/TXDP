@@ -1,5 +1,5 @@
 from uuid import uuid4
-from core.command.base import Argument
+from minecraft.command.base import Argument
 
 
 class UUIDArgument(Argument):

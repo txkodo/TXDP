@@ -1,4 +1,4 @@
-from core.command.argument.resource_location import ResourceLocation
+from minecraft.command.argument.resource_location import ResourceLocation
 
 INIT_FUNC_LOCATION = ResourceLocation("minecraft:init")
 SYS_OBJECTIVE = "_"

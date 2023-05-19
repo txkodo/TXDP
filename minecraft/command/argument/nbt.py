@@ -1,11 +1,11 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from core.command.argument.block_pos import BlockPosArgument
-from core.command.argument.entity import EntityArgument
-from core.command.argument.nbt_tag import NbtCompoundTagArgument
-from core.command.argument.resource_location import ResourceLocation
-from core.command.argument.selector import TargetSelectorArgument
-from core.command.base import Argument, ArgumentType
+from minecraft.command.argument.block_pos import BlockPosArgument
+from minecraft.command.argument.entity import EntityArgument
+from minecraft.command.argument.nbt_tag import NbtCompoundTagArgument
+from minecraft.command.argument.resource_location import ResourceLocation
+from minecraft.command.argument.selector import TargetSelectorArgument
+from minecraft.command.base import Argument, ArgumentType
 
 
 @dataclass(frozen=True)

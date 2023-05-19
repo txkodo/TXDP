@@ -11,9 +11,9 @@ from builder.object.counter import Counter
 from builder.pack_builder import PackBuilder
 from builder.range import IntRange
 from builder.scoreboard import Score
-from core.command.argument.resource_location import ResourceLocation
-from core.command.command.function import FunctionCommand
-from core.command.command.literal import LiteralCommand
+from minecraft.command.argument.resource_location import ResourceLocation
+from minecraft.command.command.function import FunctionCommand
+from minecraft.command.command.literal import LiteralCommand
 
 
 @McFunction("test:t")

@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Callable
-from core.datapack.datapack import Datapack
-from core.datapack.function import Function
+from minecraft.datapack.datapack import Datapack
+from minecraft.datapack.function import Function
 
 
 class PackBuilder:
