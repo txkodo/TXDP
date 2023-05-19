@@ -9,7 +9,7 @@ from core.command.argument.condition import ConditionArgument
 from core.command.argument.entity import EntityArgument
 from core.command.argument.storeable import StoreableArgument
 from core.command.base import Command, SubCommand
-from core.command.command.execute import ExecuteCommand
+from core.command.command.execute import ExecuteCommand, ExecuteConditionCommand
 from core.command.subcommand.main import AsSubCommand, AtSubCommand, ConditionSubCommand, OnSubCommand, StoreSubCommand
 
 
@@ -81,14 +81,21 @@ class ExecuteBuilder:
         assert self.func is not None
         self.func.__exit__(*args)
 
-    def run_command(self, command: Command):
-        return ExecuteCommand(self.sub_commands, command)
-
     def append(self, sub: SubCommand):
         return ExecuteBuilder([*self.sub_commands, sub])
 
+    def run_command(self, command: Command):
+        return ExecuteCommand(self.sub_commands, command)
+
     def Run(self, command: Command):
         FuncStack.append(self.run_command(command))
+
+    def condition_command(self, condition: Condition):
+        mode = "if" if condition.positive else "unless"
+        return ExecuteConditionCommand(self.sub_commands, ConditionSubCommand(mode, condition._condition()))
+
+    def Condition(self, condition: Condition):
+        FuncStack.append(self.condition_command(condition))
 
     def As(self, target: EntityArgument):
         return self.append(AsSubCommand(target))

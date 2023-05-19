@@ -5,7 +5,7 @@ from core.command.argument.condition import ConditionArgument
 from core.command.argument.entity import EntityArgument
 from core.command.argument.storeable import StoreableArgument
 
-from core.command.base import ArgumentType, SubCommand
+from core.command.base import ArgumentType, IConditionSubCommand, SubCommand
 
 
 @dataclass(frozen=True)
@@ -42,6 +42,6 @@ class StoreSubCommand(SubCommand):
 
 
 @dataclass(frozen=True)
-class ConditionSubCommand(SubCommand):
+class ConditionSubCommand(IConditionSubCommand):
     mode: Literal["if", "unless"]
     condition: ConditionArgument

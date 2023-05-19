@@ -21,4 +21,8 @@ class SubCommand(Argument, metaclass=ABCMeta):
     pass
 
 
+class IConditionSubCommand(SubCommand, metaclass=ABCMeta):
+    pass
+
+
 ArgumentType = bool | float | int | str | Argument

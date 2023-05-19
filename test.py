@@ -54,7 +54,10 @@ def a():
     Execute.If(score > other).Run(log)
     Execute.If(score >= other).Run(log)
 
-    Execute.If(IntRange[1:100].contains(score)).Run(log)
+    with Execute.If(score.Between(1, 100)):
+        Run(log)
+
+    Execute.Store.Result(score).Condition(score.Between(1, 100))
 
     Run(log)
 
@@ -64,5 +67,6 @@ def a():
     #     pass
     # with Else:
     #     pass
+
 
 PackBuilder.export(Path())

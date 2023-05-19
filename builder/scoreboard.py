@@ -131,7 +131,7 @@ class Score(IntIngredient, StoreTarget):
 
     @value.setter
     def value(self, value: int | Score):
-        if isinstance(value,Score) and self.score == value.score:
+        if isinstance(value, Score) and self.score == value.score:
             return
         self.Set(value)
 
@@ -325,6 +325,13 @@ class Score(IntIngredient, StoreTarget):
 
     def isin(self, other: IntRange) -> Condition:
         return ScoreMatchesCondition(True, self, other.argument())
+
+    def Between(
+        self,
+        min: int | None,
+        max: int | None,
+    ) -> Condition:
+        return ScoreMatchesCondition(True, self, IntRangeArgument(min, max))
 
 
 @dataclass(frozen=True)
