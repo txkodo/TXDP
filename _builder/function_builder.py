@@ -8,7 +8,7 @@ from click import Command
 from builder.const import INIT_FUNC_LOCATION, SYS_FUNCTION_DIRECTORY
 from builder.function_stack import FuncStack, Run
 from builder.nbt import NbtBase
-from builder.nbt_provider import NbtProvider
+from builder.base.nbt_provider import NbtProvider
 from builder.pack_builder import PackBuilder
 from builder.score_stack import ScoreStack
 from builder.scoreboard import Score

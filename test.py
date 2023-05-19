@@ -1,18 +1,4 @@
-import inspect
-import math
 from pathlib import Path
-from types import GenericAlias
-from typing import get_args, get_origin
-from builder.execute_builder import Execute
-from builder.function_builder import McFunction
-from builder.function_stack import Run
-from builder.nbt import Int, List, String
-from builder.object.counter import Counter
-from builder.pack_builder import PackBuilder
-from builder.range import IntRange
-from builder.scoreboard import Score
-from minecraft.command.argument.resource_location import ResourceLocation
-from minecraft.command.command.function import FunctionCommand
 from minecraft.command.command.literal import LiteralCommand
 
 

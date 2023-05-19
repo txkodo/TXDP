@@ -1,14 +1,14 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal, overload
-from builder.condition import Condition
-from builder.const import CONST_OBJECTIVE, SYS_OBJECTIVE
-from builder.function_stack import FuncStack, Run
-from builder.idGen import dummyplayerId, objectiveId
-from builder.range import IntIngredient, IntRange
-from builder.nbt import NbtNumerable
-from builder.score_stack import ScoreStack
-from builder.store_target import StoreTarget
+from builder.base.const import CONST_OBJECTIVE, SYS_OBJECTIVE
+from builder.base.env import Run
+from builder.base.id_generator import dummyplayerId, objectiveId
+from builder.base.init_command import add_init_command
+from builder.object.condition import Condition
+from builder.object.nbt import NbtNumerable
+from builder.object.range import IntIngredient, IntRange
+from builder.object.store_target import StoreTarget
 from minecraft.command.argument.component import ComponentArgument
 from minecraft.command.argument.condition import (
     ConditionArgument,
@@ -80,7 +80,7 @@ def get_const(value: int):
     if value in consts:
         return consts[value]
     const = Score(PlayerArgument(f"{value + 2**31:08x}"), const_objective)
-    FuncStack.append_init(const.set_command(value))
+    add_init_command(const.set_command(value))
     consts[value] = const
     return const
 
@@ -351,3 +351,19 @@ class ScoreMatchesCondition(Condition):
 
     def _condition(self) -> ConditionArgument:
         return ScoreMatchesConditionArgument(self.target.score, self.range)
+
+
+class ScoreStack:
+    stack: list[list["Score"]] = [[]]
+
+    @classmethod
+    def add(cls, var: "Score"):
+        cls.stack[-1].append(var)
+
+    @classmethod
+    def push(cls):
+        cls.stack.append([])
+
+    @classmethod
+    def pop(cls):
+        return cls.stack.pop()

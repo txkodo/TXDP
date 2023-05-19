@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Callable
 from builder.idGen import nbtId
 from builder.nbt import Compound
-from builder.nbt_provider import NbtProvider
+from builder.base.nbt_provider import NbtProvider
 from builder.object.object import NbtObject
 
 

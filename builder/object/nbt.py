@@ -2,17 +2,16 @@ from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass
 from typing import ClassVar, Generic, Literal, Protocol, TypeVar, overload, runtime_checkable
-from builder.condition import Condition
-from builder.function_stack import Run
-from builder.store_target import StoreTarget
-from builder.varstack import VarStack
+from builder.base.env import Run
+from builder.object.condition import Condition
+from builder.object.nbt_stack import NbtStack
+from builder.object.store_target import StoreTarget
 from minecraft.command.argument.condition import ConditionArgument, NbtConditionArgument
 from minecraft.command.argument.nbt import (
     NbtArgument,
     NbtAttrSegment,
     NbtMatchArgument,
     NbtMatchSegment,
-    NbtRootArgument,
     NbtRootMatchArgument,
     NbtRootMatchSegment,
     NbtRootSegment,
@@ -88,8 +87,8 @@ class NbtBase(Generic[P]):
                 return result
             case None:
                 result = super().__new__(cls)
-                id, result.nbt = VarStack.provide()
-                VarStack.add(id)
+                id, result.nbt = NbtStack.provide()
+                NbtStack.add(id)
                 return result
             case _:
                 return Value(cls._tag(value))  # type: ignore

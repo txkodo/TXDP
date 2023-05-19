@@ -1,7 +1,7 @@
 from __future__ import annotations
 from abc import abstractmethod
 from dataclasses import dataclass
-from builder.condition import Condition
+from builder.object.condition import Condition
 from minecraft.command.argument.condition import ConditionArgument
 
 from minecraft.command.argument.int_range import IntRangeArgument

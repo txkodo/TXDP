@@ -1,11 +1,17 @@
-from builder.const import SYS_STORAGE_ATTR, SYS_STORAGE_NAMESPACE
-from builder.idGen import nbtId
-from builder.nbt_provider import NbtProvider
-from minecraft.command.argument.nbt import NbtArgument, NbtAttrSegment, NbtRootArgument, NbtRootSegment, StorageNbtArgument
+from builder.base.const import SYS_STORAGE_ATTR, SYS_STORAGE_NAMESPACE
+from builder.base.id_generator import nbtId
+from builder.base.nbt_provider import NbtProvider
+from minecraft.command.argument.nbt import (
+    NbtArgument,
+    NbtAttrSegment,
+    NbtRootArgument,
+    NbtRootSegment,
+    StorageNbtArgument,
+)
 from minecraft.command.command.data import DataRemoveCommand
 
 
-class VarStack:
+class NbtStack:
     holder = StorageNbtArgument(SYS_STORAGE_NAMESPACE)
     root = NbtRootSegment(SYS_STORAGE_ATTR)
     scope = NbtRootArgument(holder, (root,))
@@ -37,8 +43,8 @@ class VarStack:
 
 
 def stack_provider():
-    id, nbt = VarStack.provide()
-    VarStack.add(id)
+    id, nbt = NbtStack.provide()
+    NbtStack.add(id)
     return nbt
 
 
