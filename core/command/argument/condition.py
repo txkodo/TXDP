@@ -37,4 +37,4 @@ class ScoreMatchesConditionArgument(ConditionArgument):
     range: IntRangeArgument
 
     def _construct(self) -> Iterable[ArgumentType]:
-        return ["data", self.target, "matches", self.range]
+        return ["score", self.target, "matches", self.range]

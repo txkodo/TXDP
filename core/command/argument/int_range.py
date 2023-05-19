@@ -13,4 +13,4 @@ class IntRangeArgument(Argument):
                 return f"..{2**31 - 1}"
             return str(self.min)
 
-        return "" if self.min is None else str(self.min) + ".." + "" if self.max is None else str(self.max)
+        return ("" if self.min is None else str(self.min)) + ".." + ("" if self.max is None else str(self.max))

@@ -44,7 +44,7 @@ class IntRange(metaclass=IntRangeMeta):
     def value(cls, value: int):
         return IntRange(value, value)
 
-    def __contains__(self, other: IntIngredient) -> Condition:
+    def contains(self, other: IntIngredient) -> Condition:
         return other.isin(self)
 
     def argument(self):

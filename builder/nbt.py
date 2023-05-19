@@ -62,8 +62,9 @@ class NbtBase(Generic[P]):
 
     @value.setter
     def value(self, value: NbtSourceProtocol[T] | P):
-        if self != value:
-            self.Set(value)
+        if isinstance(value, NbtBase) and self.nbt == value.nbt:
+            return
+        self.Set(value)
 
     @classmethod
     def New(cls: type[T], value: NbtSourceProtocol[T] | P) -> T:

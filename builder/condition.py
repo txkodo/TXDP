@@ -14,3 +14,6 @@ class Condition:
 
     def Not(self):
         return dataclasses.replace(self, positive=not self.positive)
+
+    def __bool__(self):
+        raise TypeError

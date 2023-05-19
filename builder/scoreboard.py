@@ -131,8 +131,9 @@ class Score(IntIngredient, StoreTarget):
 
     @value.setter
     def value(self, value: int | Score):
-        if self != value:
-            self.Set(value)
+        if isinstance(value,Score) and self.score == value.score:
+            return
+        self.Set(value)
 
     def get_command(self):
         return ScoreboardPlayersGet(self.score)

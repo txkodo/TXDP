@@ -1,8 +1,10 @@
 from pathlib import Path
 from builder.execute_builder import Execute
 from builder.function_builder import McFunction
+from builder.function_stack import Run
 from builder.nbt import Int, List, String
 from builder.pack_builder import PackBuilder
+from builder.range import IntRange
 from builder.scoreboard import Score
 from core.command.command.literal import LiteralCommand
 
@@ -27,13 +29,34 @@ def a():
 
     # Execute.Store.Result(Int().store(0.5)).Run(r.get_command(2))
 
-    hello = String.New("hello")
+    # hello = String.New("hello")
 
-    array = List[String].New([String("hello")])
+    # array = List[String].New([String("hello")])
 
-    Execute.If(hello == "hello").Run(LiteralCommand("say true"))
-    Execute.If(array[0] == "hello").Run(LiteralCommand("say true"))
-    Execute.If(hello == hello).Run(LiteralCommand("say true"))
+    # Execute.If(hello == "hello").Run(LiteralCommand("say true"))
+    # Execute.If(array[0] == "hello").Run(LiteralCommand("say true"))
+    # Execute.If(hello == hello).Run(LiteralCommand("say true"))
+
+    log = LiteralCommand("say true")
+
+    score = Score.New(1)
+    other = Score.New(1)
+
+    Execute.If(score == 10).Run(log)
+    Execute.If(score < 10).Run(log)
+    Execute.If(score <= 10).Run(log)
+    Execute.If(score > 10).Run(log)
+    Execute.If(score >= 10).Run(log)
+
+    Execute.If(score == other).Run(log)
+    Execute.If(score < other).Run(log)
+    Execute.If(score <= other).Run(log)
+    Execute.If(score > other).Run(log)
+    Execute.If(score >= other).Run(log)
+
+    Execute.If(IntRange[1:100].contains(score)).Run(log)
+
+    Run(log)
 
     # with If(hello == "hello" and hello == "hello"):
     #     pass
@@ -41,6 +64,5 @@ def a():
     #     pass
     # with Else:
     #     pass
-
 
 PackBuilder.export(Path())
