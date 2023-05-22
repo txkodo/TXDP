@@ -1,20 +1,16 @@
-from pathlib import Path
-from minecraft.command.command.literal import LiteralCommand
+from builder.base.syntax import RootSyntax, SyntaxStack
+from builder.converter.root import convert_root
+from builder.syntax.Elif import Elif
+from builder.syntax.If import If
 
+with If("bakadekusa"):
+    print(SyntaxStack._stack)
+    pass
+with If("bakadekusa"):
+    print(SyntaxStack._stack)
+    pass
+with Elif("bakadekusa"):
+    pass
+    print(SyntaxStack._stack)
 
-@McFunction("test:t")
-def a() -> None:
-    counter = Counter.New(10)
-
-    @McFunction()
-    def loop() -> None:
-        Run(LiteralCommand("say hello"))
-        counter.value -= 1
-        with Execute.If(counter != 0):
-            loop.Call()
-
-    with Execute.If(counter != 0):
-        loop.Call()
-
-
-PackBuilder.export(Path())
+print(convert_root(RootSyntax))
