@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import Callable, ClassVar, Generic, Literal, TypeVar, overload
-from builder.declare.const import SYS_FUNCTION_DIRECTORY
 from builder.declare.id_generator import functionId
 from minecraft.command.argument.resource_location import ResourceLocation
 from minecraft.command.base import Command
@@ -18,6 +17,8 @@ class Fragment(Generic[B]):
     _must_export: bool
     _need_export: bool
     _call_command: Command | None
+
+    _sys_directory: ResourceLocation
 
     @overload
     def __new__(cls, location: ResourceLocation) -> Fragment[Literal[True]]:
@@ -55,7 +56,7 @@ class Fragment(Generic[B]):
 
     def get_location(self):
         if self._location is None:
-            self._location = SYS_FUNCTION_DIRECTORY.child(functionId())
+            self._location = self._sys_directory.child(functionId())
         return self._location
 
     @overload

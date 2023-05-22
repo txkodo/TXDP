@@ -1,9 +1,13 @@
+from dataclasses import dataclass
 from builder.base.syntax import SyntaxBlock, SyntaxStack
+from builder.variable.condition import NbtCondition
 
 
 class If:
-    def __init__(self, condition) -> None:
+    def __init__(self, condition: NbtCondition) -> None:
         self.condition = condition
+
+    condition: NbtCondition
 
     def __enter__(self):
         result = IfSyntax(self.condition)
@@ -14,7 +18,6 @@ class If:
         SyntaxStack.pop()
 
 
+@dataclass
 class IfSyntax(SyntaxBlock):
-    def __init__(self, condition) -> None:
-        super().__init__()
-        self.condition = condition
+    condition: NbtCondition

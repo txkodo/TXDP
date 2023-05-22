@@ -1,7 +1,6 @@
 from builder.base.context import ContextStatement
 from builder.base.syntax import RootSyntaxBlock, SyntaxExecution
-from builder.context.root.ifelse import RootIfContextStatement, RootIfElseContextStatement
-from builder.context.root.main import RootContextStatement
+from builder.context.root import RootConditionContextStatement, RootContextStatement, RootIfContextStatement
 from builder.converter.persers import (
     UnionPerser,
     ConcatPerser,
@@ -36,12 +35,12 @@ def _convert_if(
             # elseもない場合
             return RootIfContextStatement(_if.condition, _if_contents)
         _else_contents = root_parser.parseAll(_else._statements)
-        return RootIfElseContextStatement(_if.condition, _if_contents, _else_contents)
+        return RootConditionContextStatement(_if.condition, _if_contents, _else_contents)
 
     [_elif_before, _elif_main], *_elifs = _elifs
 
     _else_contents = RootContextStatement([*_elif_before, _convert_if((_elif_main, _elifs, _else))])
-    return RootIfElseContextStatement(_if.condition, _if_contents, _else_contents)
+    return RootConditionContextStatement(_if.condition, _if_contents, _else_contents)
 
 
 if_parser = ApplyPerser(

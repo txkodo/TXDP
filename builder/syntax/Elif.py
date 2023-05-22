@@ -1,8 +1,10 @@
+from dataclasses import dataclass
 from builder.base.syntax import SyntaxBlock, SyntaxStack
+from builder.variable.condition import NbtCondition
 
 
 class Elif:
-    def __init__(self, condition) -> None:
+    def __init__(self, condition: NbtCondition) -> None:
         self.condition = condition
 
     def __enter__(self):
@@ -14,7 +16,6 @@ class Elif:
         SyntaxStack.pop()
 
 
+@dataclass
 class ElifSyntax(SyntaxBlock):
-    def __init__(self, condition) -> None:
-        super().__init__()
-        self.condition = condition
+    condition: NbtCondition

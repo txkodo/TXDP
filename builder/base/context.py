@@ -1,5 +1,5 @@
 from __future__ import annotations
-from abc import abstractmethod
+from abc import ABCMeta, abstractmethod
 from builder.base.fragment import Fragment
 from minecraft.command.argument.nbt import NbtArgument
 
@@ -10,7 +10,7 @@ class ContextScope:
         pass
 
 
-class ContextStatement:
+class ContextStatement(metaclass=ABCMeta):
     @abstractmethod
     def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
         pass

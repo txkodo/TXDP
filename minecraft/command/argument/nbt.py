@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from typing import ClassVar
 from minecraft.command.argument.block_pos import BlockPosArgument
 from minecraft.command.argument.entity import EntityArgument
 from minecraft.command.argument.nbt_tag import NbtCompoundTagArgument
@@ -109,6 +110,7 @@ class NbtAllItemSegment(NbtSegment):
 class NbtArgument(Argument):
     holder: NbtHolderArgument
     segments: tuple[NbtSegment, ...]
+    _matchable: ClassVar[bool]
 
     def __str__(self) -> str:
         return f"{self.holder} {''.join(map(str,self.segments))}"
@@ -131,12 +133,12 @@ class NbtArgument(Argument):
 
 @dataclass(frozen=True)
 class NbtRootArgument(NbtArgument):
-    pass
+    _matchable = True
 
 
 @dataclass(frozen=True)
 class NbtRootMatchArgument(NbtArgument):
-    pass
+    _matchable = False
 
     def match(self, value: NbtCompoundTagArgument):
         raise NotImplementedError
@@ -144,12 +146,12 @@ class NbtRootMatchArgument(NbtArgument):
 
 @dataclass(frozen=True)
 class NbtAttrArgument(NbtArgument):
-    pass
+    _matchable = True
 
 
 @dataclass(frozen=True)
 class NbtMatchArgument(NbtArgument):
-    pass
+    _matchable = False
 
     def match(self, value: NbtCompoundTagArgument):
         raise NotImplementedError
@@ -157,7 +159,7 @@ class NbtMatchArgument(NbtArgument):
 
 @dataclass(frozen=True)
 class NbtItemArgument(NbtArgument):
-    pass
+    _matchable = False
 
     def match(self, value: NbtCompoundTagArgument):
         raise NotImplementedError
@@ -165,7 +167,7 @@ class NbtItemArgument(NbtArgument):
 
 @dataclass(frozen=True)
 class NbtFilteredItemArgument(NbtArgument):
-    pass
+    _matchable = False
 
     def match(self, value: NbtCompoundTagArgument):
         raise NotImplementedError
@@ -173,7 +175,7 @@ class NbtFilteredItemArgument(NbtArgument):
 
 @dataclass(frozen=True)
 class NbtAllItemArgument(NbtArgument):
-    pass
+    _matchable = False
 
     def match(self, value: NbtCompoundTagArgument):
         raise NotImplementedError

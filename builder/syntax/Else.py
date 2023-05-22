@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from builder.base.syntax import SyntaxBlock, SyntaxStack
 
 
@@ -15,5 +16,6 @@ class Else(metaclass=ElseMeta):
     pass
 
 
+@dataclass
 class ElseSyntax(SyntaxBlock):
     pass

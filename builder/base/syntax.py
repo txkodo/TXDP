@@ -1,4 +1,5 @@
 from __future__ import annotations
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Generic, Self, TypeVar
 from builder.base.context import ContextStatement
 
@@ -17,7 +18,7 @@ class SyntaxStack:
         return cls._stack.pop()
 
     @classmethod
-    def append(cls, statement: SyntaxStatement):
+    def append(cls, statement: SyntaxStatement | SyntaxExecution):
         cls._stack[-1].append(statement)
 
 
@@ -29,13 +30,11 @@ class SyntaxStatement:
     pass
 
 
+@dataclass
 class SyntaxBlock(SyntaxStatement):
-    _statements: list[SyntaxStatement | SyntaxExecution]
+    _statements: list[SyntaxStatement | SyntaxExecution] = field(default_factory=list, init=False)
 
-    def __init__(self) -> None:
-        self._statements = []
-
-    def append(self, statement: SyntaxStatement):
+    def append(self, statement: SyntaxStatement | SyntaxExecution):
         self._statements.append(statement)
 
 
