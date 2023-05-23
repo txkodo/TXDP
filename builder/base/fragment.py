@@ -20,6 +20,9 @@ class Fragment(Generic[B]):
 
     _sys_directory: ResourceLocation
 
+    def __str__(self) -> str:
+        return str(self._commands)
+
     @overload
     def __new__(cls, location: ResourceLocation) -> Fragment[Literal[True]]:
         pass
@@ -87,8 +90,8 @@ class Fragment(Generic[B]):
 
         return command
 
-    def append(self, command: Command):
+    def append(self, *command: Command):
         if self._lock:
             ValueError("self.must_export needs to be True")
 
-        self._commands.append(command)
+        self._commands.extend(command)

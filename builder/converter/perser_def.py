@@ -36,7 +36,7 @@ class Parser(Generic[T]):
             raise ParserException("parse failed")
         input, value = result
         if input.has_next():
-            raise ParserException("パース結果が最後まで到達しませんでした")
+            raise ParserException("パースが最後まで到達しませんでした")
         return value
 
 

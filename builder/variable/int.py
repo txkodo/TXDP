@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, overload
 from builder.base.context import ContextScope
 from builder.base.fragment import Fragment
-from builder.base.variable import Variable
+from builder.base.variable import VariableType, Variable
 from builder.syntax.exec import appendSyntaxStack
 from builder.variable.condition import NbtCondition
 from builder.variable.general import WithSideEffect
@@ -28,13 +28,13 @@ from minecraft.command.subcommand.main import ConditionSubCommand, StoreSubComma
 
 
 if TYPE_CHECKING:
-    from int import Int
+    from int import IntVariable
 else:
-    Int = None
+    IntVariable = None
 
 
-class Int(Variable[Int]):
-    _type: type[Int]
+class Int(VariableType[IntVariable]):
+    _variable: type[IntVariable]
 
     @overload
     def __new__(cls, value: NbtArgument | None = None) -> IntVariable:
@@ -44,7 +44,7 @@ class Int(Variable[Int]):
     def __new__(cls, value: int) -> IntValue:
         pass
 
-    def __new__(cls, value: NbtArgument | int | None = None) -> Int:
+    def __new__(cls, value: NbtArgument | int | None = None, *_, **__) -> Int:
         if cls is not Int:
             return super().__new__(cls)
         match value:
@@ -54,9 +54,6 @@ class Int(Variable[Int]):
             case int():
                 return IntValue(value)
 
-    def _assign(self, target: NbtArgument, fragment: Fragment, scope: ContextScope) -> None:
-        raise NotImplementedError
-
     @staticmethod
     def New(value: Int | int):
         result = Int()
@@ -64,83 +61,20 @@ class Int(Variable[Int]):
         return result
 
 
-Int._type = Int
-
-
-class IntVariable(Int):
-    _nbt: NbtArgument | None
-
-    def __init__(self, nbt: NbtArgument | None = None) -> None:
-        self._nbt = nbt
-
-    def _assign(self, target: NbtArgument, fragment: Fragment, scope: ContextScope):
-        assert self._nbt
-        source = DataModifyFromSource(self._nbt)
-        fragment.append(DataSetCommand(target, source))
-
+class IntVariable(Int, Variable):
     def Set(self, value: Int | int):
-        @appendSyntaxStack
-        def _(fragment: Fragment, scope: ContextScope) -> Fragment:
-            if self._nbt is None:
-                self._nbt = scope._allocate()
-
-            match value:
-                case int():
-                    source = DataModifyValueSource(NbtIntTagArgument(value))
-                    fragment.append(DataSetCommand(self._nbt, source))
-                case _:
-                    value._assign(self._nbt, fragment, scope)
-            return fragment
-
-    def Exists(self):
-        @WithSideEffect
-        def result(fragment: Fragment, scope: ContextScope) -> NbtArgument:
-            assert self._nbt
-            result = scope._allocate()
-            source = DataModifyFromSource(self._nbt)
-            fragment.append(DataSetCommand(result, source))
-            return result
-
-        return NbtCondition(True, result)
+        if isinstance(value, int):
+            value = IntValue(value)
+        return super().Set(value)
 
     def Matches(self, value: Int | int):
-        match value:
-            case int():
-                return self._MatchesVal(value)
-            case _:
-                return self._MatchesVar(value)
+        if isinstance(value, int):
+            return super().Matches(NbtIntTagArgument(value))
+        else:
+            return super().Matches(value)
 
-    def _MatchesVar(self, value: Int):
-        @WithSideEffect
-        def result(fragment: Fragment, scope: ContextScope) -> NbtArgument:
-            assert self._nbt
-            tmp = scope._allocate()
-            result = scope._allocate()
-            value._assign(tmp, fragment, scope)
-            source = DataModifyFromSource(self._nbt)
-            fragment.append(
-                ExecuteCommand(
-                    [StoreSubCommand("success", NbtStoreableArgument(result, "byte", 1))], DataSetCommand(tmp, source)
-                )
-            )
-            match = _match_arg(result, NbtByteTagArgument(0))
-            assert match
-            return match
 
-        return NbtCondition(True, result)
-
-    def _MatchesVal(self, value: int):
-        @WithSideEffect
-        def result(fragment: Fragment, scope: ContextScope) -> NbtArgument:
-            assert self._nbt
-            arg = scope._allocate()
-            source = DataModifyFromSource(self._nbt)
-            fragment.append(DataSetCommand(arg, source))
-            match = _match_arg(arg, NbtIntTagArgument(value))
-            assert match
-            return match
-
-        return NbtCondition(True, result)
+Int._variable = IntVariable
 
 
 class IntValue(Int):
@@ -152,17 +86,3 @@ class IntValue(Int):
     def _assign(self, target: NbtArgument, fragment: Fragment, scope: ContextScope):
         source = DataModifyValueSource(NbtIntTagArgument(self._value))
         fragment.append(DataSetCommand(target, source))
-
-
-def _match_arg(nbt: NbtArgument, value: NbtTagArgument):
-    match nbt.segments:
-        case (*other, NbtAttrSegment() | NbtRootSegment() as parent, NbtAttrSegment(attr)):
-            return NbtArgument(
-                nbt.holder,
-                (*other, parent, NbtMatchSegment(NbtCompoundTagArgument({attr: value}))),
-            )
-        case (NbtRootSegment(name)):
-            return NbtArgument(
-                nbt.holder,
-                (NbtRootMatchSegment(NbtCompoundTagArgument({name: value})),),
-            )

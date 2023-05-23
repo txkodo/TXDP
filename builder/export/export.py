@@ -1,10 +1,13 @@
 from pathlib import Path
 import random
 import string
+from builder.base.context import ContextScope
 from builder.base.fragment import Fragment
 from builder.base.syntax import RootSyntax
 from builder.context.root import RootContextScope
 from builder.converter.root import convert_root
+from builder.export.event import before_convert
+from builder.export.phase import ExportPhase, change_phase
 from minecraft.command.argument.resource_location import ResourceLocation
 from minecraft.datapack.datapack import Datapack
 from minecraft.datapack.function import Function
@@ -31,16 +34,22 @@ def export(
     # ファンクションの自動生成ディレクトリの指定
     Fragment._sys_directory = sys_function_directory or ResourceLocation(f"minecraft:{id}")
 
-    # デフォルトのストレージの名前空間
-    sys_storage_namespace = sys_storage_namespace or ResourceLocation(f"minecraft:{id}")
+    # デフォルトのストレージの名前空間の設定
+    ContextScope.location = sys_storage_namespace or ResourceLocation(f"minecraft:{id}")
 
     # syntax -> context
+    before_convert()
+
+    change_phase(ExportPhase.SyntaxToContext)
+
     rootContext = convert_root(RootSyntax)
+
+    change_phase(ExportPhase.ContextToDatapack)
 
     # initファンクションの定義
     init = Fragment(init_func_location or ResourceLocation(f"{id}:init"))
 
-    scope = RootContextScope(sys_storage_namespace)
+    scope = RootContextScope()
 
     init.append(scope._clean())
 
