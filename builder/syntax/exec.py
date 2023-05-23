@@ -1,7 +1,7 @@
-from typing import Callable
-from builder.base.context import ContextScope
+from typing import Callable, Generic, TypeVar
+from builder.base.context import ContextScope, ContextStatement
 from builder.base.fragment import Fragment
-from builder.base.syntax import SyntaxExecution, SyntaxStack
+from builder.base.syntax import SyntaxExecution, SyntaxStack, SyntaxStatement
 
 
 class FuncSyntaxExecution(SyntaxExecution):

@@ -51,8 +51,15 @@ class Variable(VariableType[Self]):
         self._unsafe = unsafe
 
     @classmethod
-    def _allocate(cls, unsafe: bool) -> Self:
-        return cls(unsafe=unsafe)
+    def _Allocate(cls) -> Self:
+        result = cls()
+
+        @WithSideEffect
+        def _(_: Fragment, scope: ContextScope):
+            assert result._nbt is None
+            result._nbt = scope._allocate()
+
+        return result
 
     def _assign(self, target: NbtArgument, fragment: Fragment, scope: ContextScope):
         _nbt = self._get_nbt(scope, self._unsafe)

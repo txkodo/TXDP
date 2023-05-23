@@ -3,10 +3,10 @@ import random
 import string
 from builder.base.context import ContextScope
 from builder.base.fragment import Fragment
-from builder.base.syntax import RootSyntax
+from builder.base.syntax import RootSyntax, SyntaxStack
 from builder.context.root import RootContextScope
-from builder.converter.root import convert_root
-from builder.export.event import before_convert
+from builder.converter.sync import convert_root
+from builder.export.event import AfterConstructSyntax, OnConstructSyntax, before_convert
 from builder.export.phase import ExportPhase, change_phase
 from minecraft.command.argument.resource_location import ResourceLocation
 from minecraft.datapack.datapack import Datapack
@@ -25,6 +25,9 @@ def export(
     sys_function_directory: ResourceLocation | None = None,
     sys_storage_namespace: ResourceLocation | None = None,
 ):
+    # トップレベルでの実行のみ許可
+    assert len(SyntaxStack._stack) == 1
+
     # idは[a-z0-9]+
     assert all(i in idChars for i in id)
 
@@ -39,6 +42,10 @@ def export(
 
     # syntax -> context
     before_convert()
+    OnConstructSyntax.invoke()
+    AfterConstructSyntax.invoke()
+
+    print(RootSyntax)
 
     change_phase(ExportPhase.SyntaxToContext)
 

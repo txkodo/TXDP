@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable, ClassVar, Generic, Literal, TypeVar, overload
+from typing import ClassVar, Generic, Literal, TypeVar, overload
 from builder.declare.id_generator import functionId
 from minecraft.command.argument.resource_location import ResourceLocation
 from minecraft.command.base import Command

@@ -1,169 +1,193 @@
 from __future__ import annotations
-from dataclasses import dataclass
-import inspect
-from typing import Any, Callable, Generic, TypeVar, TypeVarTuple, get_args, get_origin
-from builder.base.context import ContextScope, ContextStatement
+from dataclasses import dataclass, field
+from typing import (
+    Callable,
+    Generic,
+    Iterable,
+    Literal,
+    TypeGuard,
+    TypeVar,
+    TypeVarTuple,
+    overload,
+)
+from winreg import SetValue
+from builder.base.context import ContextScope
 from builder.base.fragment import Fragment
 from builder.base.syntax import SyntaxBlock, SyntaxStack, SyntaxStatement
-from builder.context.scopes import SyncContextScope, SyncRecursiveContextScope
-from builder.export.event import on_before_convert
-from builder.export.phase import InCodeToSyntaxPhase, InContextToDatapackPhase
-from builder.variable.condition import NbtCondition
-from builder.variable.general import WithSideEffect
+from builder.context.scopes import SyncContextScope, SyncRecursiveContextScope, tempContextScope
+from builder.export.event import AfterConstructSyntax, on_before_convert
+from builder.export.phase import InCodeToSyntaxPhase
+from builder.syntax.OnInit import OnInit
+from builder.syntax.embed import EmbedSyntax
+from builder.util.command import append_value, set_value
+from builder.util.effect import CallFragment, ClearScope
+from builder.util.variable import belong, entangle
+from builder.util.function import denormalize_return_value, extract_function_signeture, normalize_return_value
+from builder.variable.general import LazyAction, LazyCommand, LazyCommands, WithSideEffect
+from minecraft.command.argument.nbt_tag import NbtListTagArgument
 from minecraft.command.argument.resource_location import ResourceLocation
 from builder.base.variable import Variable, VariableType
-from minecraft.command.command.data import DataModifyFromSource, DataSetCommand
+from minecraft.command.command.data import (
+    DataAppendCommand,
+    DataModifyFromSource,
+    DataModifyValueSource,
+    DataRemoveCommand,
+    DataSetCommand,
+)
 
 P = TypeVarTuple("P")
 R = TypeVar("R", bound=None | Variable | tuple[Variable, ...])
+B = TypeVar("B", bound=Literal[True, False])
 
 
-class Mcfunction:
+class Mcfunction(Generic[B]):
     location: ResourceLocation | None
     recursive: bool
 
-    def __init__(self, location: ResourceLocation | None = None, recursive: bool = False) -> None:
+    @overload
+    def __init__(
+        self: Mcfunction[Literal[False]], location: ResourceLocation | None = None, *, recursive: Literal[False] = False
+    ) -> None:
+        pass
+
+    @overload
+    def __init__(
+        self: Mcfunction[Literal[True]], location: ResourceLocation | None = None, *, recursive: Literal[True]
+    ) -> None:
+        pass
+
+    def __init__(self, location: ResourceLocation | None = None, *, recursive: bool = False) -> None:
         self.location = location
         self.recursive = recursive
 
-    def __call__(self, func: Callable[[*P], R]) -> McfunctionDef[*P, R]:
-        args, return_types = extract_signeture(func)
-        entry = Fragment(self.location or True)
-        if self.recursive:
-            # scope = SyncRecursiveContextScope()
-            # result = RecursiveMcfunctionDef(entry, args, return_types, scope)
-            raise NotImplementedError
-        else:
-            scope = SyncContextScope()
-            result = McfunctionDef(entry, args, return_types, scope)
-        SyntaxStack.append(result)
-        evaluate(result, func)
-        return result
-
-
-def evaluate(funcdef: McfunctionDef, func: Callable[..., Any]):
-    """関数の中身を後から評価(再帰した際のエラー対策)"""
-
-    @InCodeToSyntaxPhase
-    def inner():
-        SyntaxStack.push(funcdef)
-        results = func(*funcdef.args)
-        funcdef.results = result_match(results)
-        SyntaxStack.pop()
-
-    on_before_convert(inner)
-
-
-def result_match(result: None | Variable | tuple[Variable, ...]):
-    results: list[Variable] = []
-    match result:
-        case None:
-            pass
-        case Variable():
-            results.append(result)
-        case tuple():
-            for i in results:
-                assert isinstance(i, Variable)
-                results.append(i)
-    return results
-
-
-def extract_signeture(func: Callable):
-    signeture = inspect.signature(func)
-    args: list[Variable] = []
-    for p in signeture.parameters.values():
-        annotation = p.annotation
-        assert issubclass(annotation, VariableType)
-        args.append(annotation._variable._allocate(True))
-
-    return_types: list[type[Variable]] = []
-
-    return_annotation = signeture.return_annotation
-
-    if return_annotation is None:
+    @overload
+    def __call__(self: Mcfunction[Literal[False]], func: Callable[[*P], R]) -> McfunctionDef[*P, R]:
         pass
-    elif issubclass(return_annotation, Variable):
-        return_types.append(return_annotation)
-    elif issubclass(get_origin(return_annotation), tuple):
-        items = get_args(return_annotation)
-        for item in items:
-            assert issubclass(item, Variable)
-            return_types.append(item)
-    else:
-        raise ValueError
 
-    return tuple(args), tuple(return_types)
+    @overload
+    def __call__(self: Mcfunction[Literal[True]], func: Callable[[*P], R]) -> RecursiveMcfunctionDef[*P, R]:
+        pass
+
+    def __call__(self: Mcfunction, func: Callable[[*P], R]) -> McfunctionDef[*P, R] | RecursiveMcfunctionDef[*P, R]:
+        arg_types, return_types = extract_function_signeture(func)
+        if self.recursive:
+            scope = SyncRecursiveContextScope()
+            result = RecursiveMcfunctionDef(arg_types, return_types, scope, func)
+        else:
+            args = [type._Allocate() for type in arg_types]
+            scope = SyncContextScope()
+            result = McfunctionDef(args, return_types, scope, func)
+        SyntaxStack.append(result)
+        return result
 
 
 @dataclass
 class McfunctionDef(SyntaxBlock, Generic[*P, R]):
-    entry: Fragment
-    args: tuple[Variable, ...]
-    return_types: tuple[type[Variable], ...]
+    args: list[Variable]
+    return_types: list[type[Variable]]
     scope: SyncContextScope
+    func: Callable[[*P], R]
+    entry_point: Fragment = field(default_factory=Fragment)
     results: list[Variable] | None = None
 
+    def __post_init__(self):
+        on_before_convert(self.evaluate)
+
+    @InCodeToSyntaxPhase
+    def evaluate(self):
+        """関数の中身を後から評価(再帰した際のエラー対策)"""
+        SyntaxStack.push(self)
+        results = self.func(*self.args)  # type: ignore
+        self.results = normalize_return_value(results)
+        SyntaxStack.pop()
+
     def __call__(self, *args: *P) -> R:
-        for target, source in zip(self.args, args, strict=True):
-            assert isinstance(source, VariableType)
-            # 呼び出し元から引数をコピー
-            target.Set(source)
+        assert is_variable_list(args)
+        returns = [type._Allocate() for type in self.return_types]
+        self.calltask(args, returns)
+        return denormalize_return_value(returns)  # type: ignore
 
-        @WithSideEffect
-        def _(fragment: Fragment, scope: ContextScope):
-            fragment.append(self.entry.call_command())
+    def calltask(self, args: list[Variable], returns: list[Variable]):
+        embed = EmbedSyntax()
 
-        returns = []
-        for i, return_type in enumerate(self.return_types):
-            # 呼び出し元に戻り値をコピー
-            target = return_type._allocate(False)
-            returns.append(target)
+        @AfterConstructSyntax
+        def _():
+            assert self.results is not None
+            with embed:
+                for target_arg, source_arg in zip2(self.args, args):
+                    target_arg.Set(source_arg)
 
-            @WithSideEffect
-            def _(fragment: Fragment, scope: ContextScope):
-                assert self.results
-                nbt = self.results[i]._get_nbt(self.scope, True)
-                cmd = DataSetCommand(target._get_nbt(scope, True), DataModifyFromSource(nbt))
-                fragment.append(cmd)
+                CallFragment(self.entry_point)
 
-        @WithSideEffect
-        def _(fragment: Fragment, scope: ContextScope):
-            # スコープを削除
-            fragment.append(*self.scope._clear())
+                for target, source in zip2(returns, self.results):
+                    target.Set(source)
 
-        match len(returns):
-            case 0:
-                result = None
-            case 1:
-                result = returns[0]
-            case 2:
-                result = tuple(returns)
-
-        return result  # type: ignore
+                ClearScope(self.scope)
 
 
 @dataclass
 class RecursiveMcfunctionDef(SyntaxBlock, Generic[*P, R]):
-    entry: Fragment
-    args: tuple[Variable, ...]
-    returns: tuple[Variable, ...]
+    arg_types: list[type[Variable]]
+    return_types: list[type[Variable]]
     scope: SyncRecursiveContextScope
+    func: Callable[[*P], R]
+    entry_point: Fragment = field(default_factory=Fragment)
+    results: list[Variable] = field(default_factory=list)
+    args: list[Variable] = field(default_factory=list)
+
+    def __post_init__(self):
+        source_args: list[Variable] = []
+        target_args: list[Variable] = []
+        for i in self.arg_types:
+            source_arg = i()
+            source_args.append(source_arg)
+            target_arg = i()
+            target_args.append(target_arg)
+            entangle((source_arg, tempContextScope), (target_arg, self.scope))
+
+        self.args = source_args
+        self.results = [belong(i(), tempContextScope) for i in self.return_types]
+
+        @InCodeToSyntaxPhase
+        def evaluate():
+            """関数の中身を後から評価(再帰した際のエラー対策)"""
+            SyntaxStack.push(self)
+
+            LazyCommand(lambda: append_value(self.scope.stack_root, tempContextScope.root))
+
+            result = self.func(*target_args)  # type: ignore
+
+            results = normalize_return_value(result)
+            for source, target in zip2(results, self.results):
+                target.Set(source)
+
+            LazyCommands(lambda: self.scope._clear())
+
+            SyntaxStack.pop()
+
+        on_before_convert(evaluate)
 
     def __call__(self, *args: *P) -> R:
-        for target, source in zip(self.args, args, strict=True):
-            assert isinstance(source, VariableType)
+        assert is_variable_list(args)
+        for source, target in zip2(args, self.args):
+            t = target
+            t.Set(source)
+
+        CallFragment(self.entry_point)
+
+        returns = [type._Allocate() for type in self.return_types]
+        for target, source in zip2(returns, self.results):
             target.Set(source)
 
-        @WithSideEffect
-        def _(fragment: Fragment, scope: ContextScope):
-            fragment.append(self.entry.call_command())
+        LazyCommands(lambda: tempContextScope._clear())
 
-        match len(self.returns):
-            case 0:
-                result = None
-            case 1:
-                result = self.returns[0]
-            case 2:
-                result = tuple(self.returns)
+        return denormalize_return_value(returns)  # type: ignore
 
-        return result  # type: ignore
+
+def zip2(a: list[Variable], b: list[Variable]) -> Iterable[tuple[Variable, Variable]]:
+    return zip(a, b, strict=True)
+
+
+def is_variable_list(args) -> TypeGuard[list[Variable]]:
+    assert all(isinstance(arg, Variable) for arg in args)
+    return True

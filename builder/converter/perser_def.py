@@ -36,7 +36,8 @@ class Parser(Generic[T]):
             raise ParserException("parse failed")
         input, value = result
         if input.has_next():
-            raise ParserException("パースが最後まで到達しませんでした")
+            input, value = input.next()
+            raise ParserException(f"パースが最後まで到達しませんでした。{type(value).__name__}はこの文脈で使用出来ません。")
         return value
 
 
@@ -86,6 +87,8 @@ class OptionalPerser(Parser[T | None]):
 A = TypeVar("A")
 B = TypeVar("B")
 C = TypeVar("C")
+D = TypeVar("D")
+E = TypeVar("E")
 
 
 class UnionPerser(Parser[T]):
@@ -99,6 +102,16 @@ class UnionPerser(Parser[T]):
 
     @overload
     def __init__(self: UnionPerser[A | B | C], a: Parser[A], b: Parser[B], c: Parser[C]) -> None:
+        pass
+
+    @overload
+    def __init__(self: UnionPerser[A | B | C | D], a: Parser[A], b: Parser[B], c: Parser[C], d: Parser[D]) -> None:
+        pass
+
+    @overload
+    def __init__(
+        self: UnionPerser[A | B | C | D | E], a: Parser[A], b: Parser[B], c: Parser[C], d: Parser[D], e: Parser[E]
+    ) -> None:
         pass
 
     def __init__(self, *parsers: Parser) -> None:  # type: ignore

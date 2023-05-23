@@ -1,32 +1,13 @@
-from __future__ import annotations
-from dataclasses import dataclass
-from typing import ClassVar, Generic, TypeVar
+from typing import TypeVar, TypeVarTuple
 
 
-@dataclass(frozen=True)
-class Base:
-    pass
+P = TypeVarTuple("P")
+
+T = TypeVar("T")
 
 
-T = TypeVar("T", bound=Base)
+def a(*a: *P) -> tuple[*P]:
+    return a
 
 
-@dataclass(frozen=True)
-class Byte(Base):
-    pass
-
-
-class ListMeta(type):
-    def __getitem__(cls, item: type[T]) -> type[List[T]]:
-        class L(List):
-            _generic = item
-
-        return L
-
-
-@dataclass(frozen=True)
-class List(Base, Generic[T], metaclass=ListMeta):
-    _generic: ClassVar[type[Base]]
-
-    def __getitem__(self, index: int) -> T:
-        return self._generic()  # type: ignore
+k = a(2, "a")

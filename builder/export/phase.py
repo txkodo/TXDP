@@ -20,24 +20,34 @@ def change_phase(phase: ExportPhase):
 
 
 def InCodeToSyntaxPhase(func: Callable[P, R]) -> Callable[P, R]:
+    """コードを実行してSyntaxオブジェクトが生成されるフェーズ内で実行されることを保証する"""
+
     def inner(*arg: P.args, **kwarg: P.kwargs):
-        assert current_phase is ExportPhase.CodeToSyntax
+        if current_phase is not ExportPhase.CodeToSyntax:
+            raise AssertionError(current_phase)
+
         return func(*arg, **kwarg)
 
     return inner
 
 
 def InSyntaxToContextPhase(func: Callable[P, R]) -> Callable[P, R]:
+    """Syntaxオブジェクトを変換してContextオブジェクトが生成されるフェーズ内で実行されることを保証する"""
+
     def inner(*arg: P.args, **kwarg: P.kwargs):
-        assert current_phase is ExportPhase.SyntaxToContext
+        if current_phase is not ExportPhase.SyntaxToContext:
+            raise AssertionError(current_phase)
         return func(*arg, **kwarg)
 
     return inner
 
 
 def InContextToDatapackPhase(func: Callable[P, R]) -> Callable[P, R]:
+    """Contextオブジェクトを変換してデータパックを出力するフェーズ内で実行されることを保証する"""
+
     def inner(*arg: P.args, **kwarg: P.kwargs):
-        assert current_phase is ExportPhase.ContextToDatapack
+        if current_phase is not ExportPhase.ContextToDatapack:
+            raise AssertionError(current_phase)
         return func(*arg, **kwarg)
 
     return inner

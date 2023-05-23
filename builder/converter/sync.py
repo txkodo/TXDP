@@ -7,13 +7,14 @@ from builder.context.sync import (
     SyncIfContextStatement,
 )
 from builder.converter.base import SyntaxParser
+from builder.converter.flatten import resolve_embed_syntax
 from builder.syntax.Elif import ElifSyntax
 from builder.syntax.Else import ElseSyntax
-from builder.syntax.Function import McfunctionDef
+from builder.syntax.Function import McfunctionDef, RecursiveMcfunctionDef
 from builder.syntax.If import IfSyntax
 
 
-class RootSyntaxParser(SyntaxParser[SyncContextStatement]):
+class SyncSyntaxParser(SyntaxParser[SyncContextStatement]):
     @classmethod
     def _if(
         cls, arg: tuple[IfSyntax | ElifSyntax, list[tuple[list[SyntaxExecution], ElifSyntax]], ElseSyntax | None]
@@ -36,8 +37,8 @@ class RootSyntaxParser(SyntaxParser[SyncContextStatement]):
         return SyncConditionContextStatement(_if.condition, _if_contents, _else_contents)
 
     @classmethod
-    def _funcdef(cls, arg: McfunctionDef) -> ContextStatement:
-        return SyncFuncdefContextStatement(cls.parseAll(arg._statements), arg.scope, arg.entry)
+    def _funcdef(cls, arg: McfunctionDef | RecursiveMcfunctionDef) -> ContextStatement:
+        return SyncFuncdefContextStatement(cls.parseAll(arg._statements), arg.scope, arg.entry_point)
 
     @classmethod
     def _root(cls, arg: list[ContextStatement]):
@@ -45,4 +46,4 @@ class RootSyntaxParser(SyntaxParser[SyncContextStatement]):
 
 
 def convert_root(block: RootSyntaxBlock):
-    return RootSyntaxParser.parseAll(block._statements)
+    return SyncSyntaxParser.parseAll(resolve_embed_syntax(block._statements))

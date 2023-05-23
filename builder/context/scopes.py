@@ -1,24 +1,36 @@
+from abc import abstractmethod
 from builder.base.context import ContextScope
 from builder.declare.id_generator import nbtId
+from builder.export.phase import InContextToDatapackPhase
 from minecraft.command.argument.nbt import NbtArgument
 from minecraft.command.command.data import DataRemoveCommand
 
 
-class SyncContextScope(ContextScope):
+class BaseContextScope(ContextScope):
     _allocated: list[NbtArgument]
 
     def __init__(self) -> None:
-        self.id = nbtId()
+        self.id = None
         self._allocated = []
 
-    @property
-    def root(self):
-        return self._storage.root("S").attr(self.id)
+    @InContextToDatapackPhase
+    def get_id(self):
+        if self.id is None:
+            self.id = nbtId()
+        return self.id
 
-    def _allocate(self) -> NbtArgument:
-        result = self.root.attr(nbtId())
+    @property
+    @abstractmethod
+    def root(self) -> NbtArgument:
+        pass
+
+    def _allocate_with_id(self, id) -> NbtArgument:
+        result = self.root.attr(id)
         self._allocated.append(result)
         return result
+
+    def _allocate(self) -> NbtArgument:
+        return self._allocate_with_id(nbtId())
 
     def _clear(self):
         if self._allocated:
@@ -26,24 +38,35 @@ class SyncContextScope(ContextScope):
         return []
 
 
-class SyncRecursiveContextScope(ContextScope):
-    _allocated: list[NbtArgument]
+class _TempContextScope(BaseContextScope):
+    @property
+    def root(self):
+        return self._storage.root("T")
 
-    def __init__(self) -> None:
-        self.id = nbtId()
-        self._allocated = []
+
+tempContextScope = _TempContextScope()
+
+
+class SyncContextScope(BaseContextScope):
+    @property
+    def root(self):
+        return self._storage.root("S").attr(self.get_id())
+
+
+class SyncRecursiveContextScope(SyncContextScope):
+    @property
+    def stack_root(self):
+        return self._storage.root("R").attr(self.get_id())
 
     @property
     def root(self):
-        return self._storage.root("R")
+        return self.stack_root.item(-1)
 
     def _allocate(self) -> NbtArgument:
-        # kokotigau
-        result = self.root.attr(self.id).attr(nbtId())
+        result = self.root.attr("_").attr(nbtId())
         self._allocated.append(result)
         return result
 
-    def _clear(self):
-        if self._allocated:
-            return [DataRemoveCommand(self.root)]
-        return []
+    def _allocate_with_temp(self):
+        id = nbtId()
+        return self._allocate_with_id(id), tempContextScope._allocate_with_id(id)
