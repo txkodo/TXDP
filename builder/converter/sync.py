@@ -1,5 +1,6 @@
+from typing import TypeVar
 from builder.base.context import ContextStatement
-from builder.base.syntax import RootSyntaxBlock, SyntaxExecution
+from builder.base.syntax import SyntaxExecution
 from builder.context.sync import (
     SyncConditionContextStatement,
     SyncContextStatement,
@@ -7,11 +8,13 @@ from builder.context.sync import (
     SyncIfContextStatement,
 )
 from builder.converter.base import SyntaxParser
-from builder.converter.flatten import resolve_embed_syntax
+from builder.converter.perser_def import ApplyPerser, RepeatPerser, SymbolParser, UnionPerser
 from builder.syntax.Elif import ElifSyntax
 from builder.syntax.Else import ElseSyntax
-from builder.syntax.Function import McfunctionDef, RecursiveMcfunctionDef
+from builder.syntax.FunctionDef import McfunctionDef, RecursiveMcfunctionDef
 from builder.syntax.If import IfSyntax
+
+T = TypeVar("T", bound=ContextStatement)
 
 
 class SyncSyntaxParser(SyntaxParser[SyncContextStatement]):
@@ -37,13 +40,9 @@ class SyncSyntaxParser(SyntaxParser[SyncContextStatement]):
         return SyncConditionContextStatement(_if.condition, _if_contents, _else_contents)
 
     @classmethod
-    def _funcdef(cls, arg: McfunctionDef | RecursiveMcfunctionDef) -> ContextStatement:
-        return SyncFuncdefContextStatement(cls.parseAll(arg._statements), arg.scope, arg.entry_point)
-
-    @classmethod
     def _root(cls, arg: list[ContextStatement]):
         return SyncContextStatement(arg)
 
-
-def convert_root(block: RootSyntaxBlock):
-    return SyncSyntaxParser.parseAll(resolve_embed_syntax(block._statements))
+    @classmethod
+    def _funcdef(cls, arg: McfunctionDef | RecursiveMcfunctionDef) -> ContextStatement:
+        return SyncFuncdefContextStatement(SyncSyntaxParser.parseAll(arg._statements), arg.scope, arg.entry_point)

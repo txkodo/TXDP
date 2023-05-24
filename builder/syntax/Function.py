@@ -1,35 +1,31 @@
 from __future__ import annotations
-from dataclasses import dataclass, field
-from typing import (
-    Callable,
-    Generic,
-    Iterable,
-    Literal,
-    TypeGuard,
-    TypeVar,
-    TypeVarTuple,
-    overload,
-)
+from typing import Callable, Generic, Literal, TypeVar, TypeVarTuple, overload
 from builder.base.fragment import Fragment
-from builder.base.syntax import SyntaxBlock, SyntaxStack
-from builder.context.scopes import SyncContextScope, SyncRecursiveContextScope, tempContextScope
-from builder.export.event import AfterConstructSyntax, on_before_convert
-from builder.export.phase import InCodeToSyntaxPhase
-from builder.syntax.embed import EmbedSyntax
-from builder.util.command import data_append
-from builder.util.effect import CallFragment, ClearScope
-from builder.util.variable import belongs_to, entangle
-from builder.util.function import denormalize_return_value, extract_function_signeture, normalize_return_value
-from builder.syntax.general import LazyCommand, LazyCommands
+from builder.base.syntax import SyntaxStack
+from builder.base.variable import Assign
+from builder.context.scopes import SyncContextScope, SyncRecursiveContextScope
+from builder.syntax.FunctionDef import McfunctionDef, RecursiveMcfunctionDef
+from builder.util.function import extract_function_signeture
 from builder.variable.base import BaseVariable
 from minecraft.command.argument.resource_location import ResourceLocation
 
 P = TypeVarTuple("P")
 R = TypeVar("R", bound=None | BaseVariable | tuple[BaseVariable, ...])
-B = TypeVar("B", bound=Literal[True, False])
+X = TypeVar("X", bound=Literal[True, False])
+
+P0 = TypeVar("P0", bound=BaseVariable)
+P1 = TypeVar("P1", bound=BaseVariable)
+P2 = TypeVar("P2", bound=BaseVariable)
+P3 = TypeVar("P3", bound=BaseVariable)
+P4 = TypeVar("P4", bound=BaseVariable)
+R0 = TypeVar("R0", bound=BaseVariable)
+R1 = TypeVar("R1", bound=BaseVariable)
+R2 = TypeVar("R2", bound=BaseVariable)
+R3 = TypeVar("R3", bound=BaseVariable)
+R4 = TypeVar("R4", bound=BaseVariable)
 
 
-class Mcfunction(Generic[B]):
+class Mcfunction(Generic[X]):
     location: ResourceLocation | None
     recursive: bool
 
@@ -52,14 +48,301 @@ class Mcfunction(Generic[B]):
         self.recursive = recursive
 
     @overload
-    def __call__(self: Mcfunction[Literal[False]], func: Callable[[*P], R]) -> McfunctionDef[*P, R]:
+    def __call__(self: Mcfunction[Literal[False]], func: Callable[[], None]) -> McfunctionDef[None]:
         pass
 
     @overload
-    def __call__(self: Mcfunction[Literal[True]], func: Callable[[*P], R]) -> RecursiveMcfunctionDef[*P, R]:
+    def __call__(self: Mcfunction[Literal[True]], func: Callable[[], None]) -> RecursiveMcfunctionDef[None]:
         pass
 
-    def __call__(self: Mcfunction, func: Callable[[*P], R]) -> McfunctionDef[*P, R] | RecursiveMcfunctionDef[*P, R]:
+    @overload
+    def __call__(self: Mcfunction[Literal[False]], func: Callable[[], Assign[R0]]) -> McfunctionDef[R0]:
+        pass
+
+    @overload
+    def __call__(self: Mcfunction[Literal[True]], func: Callable[[], Assign[R0]]) -> RecursiveMcfunctionDef[R0]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[], tuple[Assign[R0], Assign[R1]]]
+    ) -> McfunctionDef[tuple[R0, R1]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[], tuple[Assign[R0], Assign[R1]]]
+    ) -> RecursiveMcfunctionDef[tuple[R0, R1]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[], tuple[Assign[R0], Assign[R1], Assign[R2]]]
+    ) -> McfunctionDef[tuple[R0, R1, R2]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[], tuple[Assign[R0], Assign[R1], Assign[R2]]]
+    ) -> RecursiveMcfunctionDef[tuple[R0, R1, R2]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[], tuple[Assign[R0], Assign[R1], Assign[R2], Assign[R3]]]
+    ) -> McfunctionDef[tuple[R0, R1, R2, R3]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[], tuple[Assign[R0], Assign[R1], Assign[R2], Assign[R3]]]
+    ) -> RecursiveMcfunctionDef[tuple[R0, R1, R2, R3]]:
+        pass
+
+    @overload
+    def __call__(self: Mcfunction[Literal[False]], func: Callable[[P0], None]) -> McfunctionDef[Assign[P0], None]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0], None]
+    ) -> RecursiveMcfunctionDef[Assign[P0], None]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0], Assign[R0]]
+    ) -> McfunctionDef[Assign[P0], R0]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0], Assign[R0]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], R0]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0], tuple[Assign[R0], Assign[R1]]]
+    ) -> McfunctionDef[Assign[P0], tuple[R0, R1]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0], tuple[Assign[R0], Assign[R1]]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], tuple[R0, R1]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0], tuple[Assign[R0], Assign[R1], Assign[R2]]]
+    ) -> McfunctionDef[Assign[P0], tuple[R0, R1, R2]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0], tuple[Assign[R0], Assign[R1], Assign[R2]]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], tuple[R0, R1, R2]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0], tuple[Assign[R0], Assign[R1], Assign[R2], Assign[R3]]]
+    ) -> McfunctionDef[Assign[P0], tuple[R0, R1, R2, R3]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0], tuple[Assign[R0], Assign[R1], Assign[R2], Assign[R3]]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], tuple[R0, R1, R2, R3]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0, P1], None]
+    ) -> McfunctionDef[Assign[P0], Assign[P1], None]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0, P1], None]
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], None]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0, P1], Assign[R0]]
+    ) -> McfunctionDef[Assign[P0], Assign[P1], R0]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0, P1], Assign[R0]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], R0]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0, P1], tuple[Assign[R0], Assign[R1]]]
+    ) -> McfunctionDef[Assign[P0], Assign[P1], tuple[R0, R1]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0, P1], tuple[Assign[R0], Assign[R1]]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], tuple[R0, R1]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0, P1], tuple[Assign[R0], Assign[R1], Assign[R2]]]
+    ) -> McfunctionDef[Assign[P0], Assign[P1], tuple[R0, R1, R2]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0, P1], tuple[Assign[R0], Assign[R1], Assign[R2]]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], tuple[R0, R1, R2]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]],
+        func: Callable[[P0, P1], tuple[Assign[R0], Assign[R1], Assign[R2], Assign[R3]]],
+    ) -> McfunctionDef[Assign[P0], Assign[P1], tuple[R0, R1, R2, R3]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0, P1], tuple[Assign[R0], Assign[R1], Assign[R2], Assign[R3]]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], tuple[R0, R1, R2, R3]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0, P1, P2], None]
+    ) -> McfunctionDef[Assign[P0], Assign[P1], Assign[P2], None]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0, P1, P2], None]
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], Assign[P2], None]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0, P1, P2], Assign[R0]]
+    ) -> McfunctionDef[Assign[P0], Assign[P1], Assign[P2], R0]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0, P1, P2], Assign[R0]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], Assign[P2], R0]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0, P1, P2], tuple[Assign[R0], Assign[R1]]]
+    ) -> McfunctionDef[Assign[P0], Assign[P1], Assign[P2], tuple[R0, R1]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0, P1, P2], tuple[Assign[R0], Assign[R1]]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], Assign[P2], tuple[R0, R1]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0, P1, P2], tuple[Assign[R0], Assign[R1], Assign[R2]]]
+    ) -> McfunctionDef[Assign[P0], Assign[P1], Assign[P2], tuple[R0, R1, R2]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0, P1, P2], tuple[Assign[R0], Assign[R1], Assign[R2]]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], Assign[P2], tuple[R0, R1, R2]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]],
+        func: Callable[[P0, P1, P2], tuple[Assign[R0], Assign[R1], Assign[R2], Assign[R3]]],
+    ) -> McfunctionDef[Assign[P0], Assign[P1], Assign[P2], tuple[R0, R1, R2, R3]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]],
+        func: Callable[[P0, P1, P2], tuple[Assign[R0], Assign[R1], Assign[R2], Assign[R3]]],
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], Assign[P2], tuple[R0, R1, R2, R3]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0, P1, P2, P3], None]
+    ) -> McfunctionDef[Assign[P0], Assign[P1], Assign[P2], Assign[P3], None]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0, P1, P2, P3], None]
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], Assign[P2], Assign[P3], None]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0, P1, P2, P3], Assign[R0]]
+    ) -> McfunctionDef[Assign[P0], Assign[P1], Assign[P2], Assign[P3], R0]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0, P1, P2, P3], Assign[R0]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], Assign[P2], Assign[P3], R0]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0, P1, P2, P3], tuple[Assign[R0], Assign[R1]]]
+    ) -> McfunctionDef[Assign[P0], Assign[P1], Assign[P2], Assign[P3], tuple[R0, R1]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0, P1, P2, P3], tuple[Assign[R0], Assign[R1]]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], Assign[P2], Assign[P3], tuple[R0, R1]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]], func: Callable[[P0, P1, P2, P3], tuple[Assign[R0], Assign[R1], Assign[R2]]]
+    ) -> McfunctionDef[Assign[P0], Assign[P1], Assign[P2], Assign[P3], tuple[R0, R1, R2]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]], func: Callable[[P0, P1, P2, P3], tuple[Assign[R0], Assign[R1], Assign[R2]]]
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], Assign[P2], Assign[P3], tuple[R0, R1, R2]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[False]],
+        func: Callable[[P0, P1, P2, P3], tuple[Assign[R0], Assign[R1], Assign[R2], Assign[R3]]],
+    ) -> McfunctionDef[Assign[P0], Assign[P1], Assign[P2], Assign[P3], tuple[R0, R1, R2, R3]]:
+        pass
+
+    @overload
+    def __call__(
+        self: Mcfunction[Literal[True]],
+        func: Callable[[P0, P1, P2, P3], tuple[Assign[R0], Assign[R1], Assign[R2], Assign[R3]]],
+    ) -> RecursiveMcfunctionDef[Assign[P0], Assign[P1], Assign[P2], Assign[P3], tuple[R0, R1, R2, R3]]:
+        pass
+
+    def __call__(self: Mcfunction, func: Callable[[*P], R]) -> McfunctionDef[*P, R] | RecursiveMcfunctionDef[*P, R]:  # type: ignore
         arg_types, return_types = extract_function_signeture(func)
         entry_point = Fragment(False if self.location is None else self.location)
         if self.recursive:
@@ -71,122 +354,3 @@ class Mcfunction(Generic[B]):
             result = McfunctionDef(args, return_types, scope, func, entry_point)
         SyntaxStack.append(result)
         return result
-
-
-@dataclass
-class McfunctionDef(SyntaxBlock, Generic[*P, R]):
-    args: list[BaseVariable]
-    return_types: list[type[BaseVariable]]
-    scope: SyncContextScope
-    func: Callable[[*P], R]
-    entry_point: Fragment
-    results: list[BaseVariable] | None = None
-
-    def __post_init__(self):
-        on_before_convert(self.evaluate)
-
-    @InCodeToSyntaxPhase
-    def evaluate(self):
-        """関数の中身を後から評価(再帰した際のエラー対策)"""
-        SyntaxStack.push(self)
-        results = self.func(*self.args)  # type: ignore
-        self.results = normalize_return_value(results)
-        if len(self.results) == 0:
-            ClearScope(self.scope)
-        SyntaxStack.pop()
-
-    def __call__(self, *args: *P) -> R:
-        assert is_variable_list(args)
-        returns = [type(allocator=True) for type in self.return_types]
-        self.calltask(args, returns)
-        return denormalize_return_value(returns)  # type: ignore
-
-    def calltask(self, args: list[BaseVariable], returns: list[BaseVariable]):
-        embed = EmbedSyntax()
-
-        @AfterConstructSyntax
-        def _():
-            assert self.results is not None
-            with embed:
-                for target_arg, source_arg in zip2(self.args, args):
-                    target_arg.Set(source_arg)
-
-                CallFragment(self.entry_point)
-
-                for target, source in zip2(returns, self.results):
-                    target.Set(source)
-
-                if len(returns) > 0:
-                    ClearScope(self.scope)
-
-
-@dataclass
-class RecursiveMcfunctionDef(SyntaxBlock, Generic[*P, R]):
-    arg_types: list[type[BaseVariable]]
-    return_types: list[type[BaseVariable]]
-    scope: SyncRecursiveContextScope
-    func: Callable[[*P], R]
-    entry_point: Fragment
-    results: list[BaseVariable] = field(default_factory=list)
-    args: list[BaseVariable] = field(default_factory=list)
-
-    def __post_init__(self):
-        source_args: list[BaseVariable] = []
-        target_args: list[BaseVariable] = []
-        for i in self.arg_types:
-            source_arg = i(allocator=False)
-            source_args.append(source_arg)
-            target_arg = i(allocator=False, unsafe=True)
-            target_args.append(target_arg)
-            entangle((source_arg, tempContextScope), (target_arg, self.scope))
-
-        self.args = source_args
-        self.results = [belongs_to(i(allocator=False), tempContextScope) for i in self.return_types]
-
-        @InCodeToSyntaxPhase
-        def evaluate():
-            """関数の中身を後から評価(再帰した際のエラー対策)"""
-            SyntaxStack.push(self)
-
-            # 引数のコピー
-            LazyCommand(lambda: data_append(self.scope.stack_root, tempContextScope.root))
-            if self.args:
-                LazyCommands(lambda: tempContextScope._clear())
-
-            result = self.func(*target_args)  # type: ignore
-
-            results = normalize_return_value(result)
-
-            # 戻り値のコピー
-            for source, target in zip2(results, self.results):
-                target.Set(source)
-            LazyCommands(lambda: self.scope._clear())
-
-            SyntaxStack.pop()
-
-        on_before_convert(evaluate)
-
-    def __call__(self, *args: *P) -> R:
-        assert is_variable_list(args)
-        for source, target in zip2(args, self.args):
-            t = target
-            t.Set(source)
-
-        CallFragment(self.entry_point)
-
-        returns = [type(allocator=True) for type in self.return_types]
-        for target, source in zip2(returns, self.results):
-            target.Set(source)
-
-        LazyCommands(lambda: tempContextScope._clear())
-
-        return denormalize_return_value(returns)  # type: ignore
-
-
-def zip2(a: list[BaseVariable], b: list[BaseVariable]) -> Iterable[tuple[BaseVariable, BaseVariable]]:
-    return zip(a, b, strict=True)
-
-
-def is_variable_list(args) -> TypeGuard[list[BaseVariable]]:
-    assert all(isinstance(arg, BaseVariable) for arg in args)
-    return True

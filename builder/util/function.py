@@ -1,5 +1,6 @@
 import inspect
 from typing import Callable, get_args, get_origin
+from builder.base.variable import Assign
 
 from builder.variable.base import BaseVariable
 
@@ -19,6 +20,9 @@ def extract_function_signeture(func: Callable) -> tuple[list[type[BaseVariable]]
 
     if return_annotation is None:
         pass
+    elif get_origin(return_annotation) is Assign:
+        a = get_args(return_annotation)
+        return_types.append(a[0])
     elif issubclass(return_annotation, BaseVariable):
         return_types.append(return_annotation)
     elif issubclass(get_origin(return_annotation), tuple):
@@ -30,7 +34,6 @@ def extract_function_signeture(func: Callable) -> tuple[list[type[BaseVariable]]
         raise ValueError
 
     return args, return_types
-
 
 def normalize_return_value(result: None | BaseVariable | tuple[BaseVariable, ...]) -> list[BaseVariable]:
     results: list[BaseVariable] = []

@@ -1,13 +1,10 @@
 from __future__ import annotations
-from math import ceil, floor, log
+from math import floor, log
 from builder.base.context import ContextScope
 from builder.base.fragment import Fragment
 from builder.base.variable import Assign
 from builder.syntax.general import LazyAction
 from builder.util.id import intId
-from builder.util.effect import CallFragment
-from builder.util.nbt import nbt_match_path
-from builder.variable.Byte import Byte
 from builder.variable.Compound import Compound, CompoundValue
 from minecraft.command.argument.condition import NbtConditionArgument
 from minecraft.command.argument.nbt_tag import NbtByteTagArgument, NbtCompoundTagArgument, NbtTagArgument
@@ -21,11 +18,11 @@ class BineryTree:
     __entry: Fragment | None = None
     __nbt: Compound
 
-    def __init__(self) -> None:
+    def __init__(self, compound: Compound) -> None:
         self.__funcs = []
         self.__len = 0
         self.__frozen = False
-        self.__nbt = Compound()
+        self.__nbt = compound
 
         @LazyAction
         def _(_: Fragment, __: ContextScope):
@@ -76,13 +73,13 @@ class BineryTree:
         digits.reverse()
         return NbtCompoundTagArgument({intId(i): NbtByteTagArgument(int(digit)) for i, digit in enumerate(digits)})
 
-    def Call(self, id: Assign[Compound]):
+    def Call(self):
         """idの値に応じて実行先を変更する"""
-        self.__nbt.Set(id)
 
         @LazyAction
         def _(f: Fragment, _):
             assert self.__entry is not None
+            assert self.__frozen
             self.__entry.embed(f)
 
 

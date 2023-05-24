@@ -1,4 +1,5 @@
 from pathlib import Path
+from builder.base.variable import Assign
 from builder.syntax.Else import Else
 from builder.export.export import export
 from builder.syntax.Elif import Elif
@@ -24,13 +25,14 @@ t = Int.New(320)
 
 
 @Mcfunction("unchi")
-def test() -> None:
+def test(a: Int, b: Int) -> Assign[Int]:
     Int.New(12901)
     Int.New(12901)
     Int.New(12901)
     Int.New(12901)
+    return a
 
 
-test()
+t = test(Int.New(12901), Int.New(12901))
 
 export(Path(), "txc")

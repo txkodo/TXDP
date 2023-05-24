@@ -5,7 +5,7 @@ from builder.base.context import ContextScope
 from builder.base.fragment import Fragment
 from builder.base.syntax import RootSyntax, SyntaxStack
 from builder.context.root import RootContextScope
-from builder.converter.sync import convert_root
+from builder.converter.root import convert_root
 from builder.export.event import AfterConstructSyntax, OnConstructSyntax, before_convert
 from builder.export.phase import ExportPhase, change_phase
 from minecraft.command.argument.resource_location import ResourceLocation
@@ -67,7 +67,5 @@ def export(
         func = fragment.export()
         if func is not None:
             funcs.append(func)
-
-    print(funcs)
 
     Datapack(path, funcs).export()

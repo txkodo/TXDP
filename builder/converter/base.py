@@ -12,7 +12,7 @@ from builder.converter.perser_def import (
 )
 from builder.syntax.Elif import ElifSyntax
 from builder.syntax.Else import ElseSyntax
-from builder.syntax.Function import McfunctionDef, RecursiveMcfunctionDef
+from builder.syntax.FunctionDef import McfunctionDef, RecursiveMcfunctionDef
 from builder.syntax.If import IfSyntax
 
 T = TypeVar("T", bound=ContextStatement)
@@ -20,27 +20,48 @@ T = TypeVar("T", bound=ContextStatement)
 
 class SyntaxParser(Generic[T], metaclass=ABCMeta):
     @classmethod
-    def parseAll(cls, statements: list[SyntaxStatement | SyntaxExecution]):
-        execution_parser = SymbolParser(SyntaxExecution)
-        expression_parser = UnionPerser(execution_parser)
+    @property
+    def execution_parser(cls):
+        return SymbolParser(SyntaxExecution)
 
-        expressions_parser = RepeatPerser(expression_parser)
+    @classmethod
+    @property
+    def expression_parser(cls):
+        return cls.execution_parser
 
-        else_parser = SymbolParser(ElseSyntax)
-        elif_parser = ConcatPerser(expressions_parser, SymbolParser(ElifSyntax))
+    @classmethod
+    @property
+    def expressions_parser(cls):
+        return RepeatPerser(cls.expression_parser)
 
-        if_parser = ApplyPerser(
-            ConcatPerser(SymbolParser(IfSyntax), RepeatPerser(elif_parser), OptionalPerser(else_parser)), cls._if
+    @classmethod
+    @property
+    def elif_parser(cls):
+        return ConcatPerser(cls.expressions_parser, SymbolParser(ElifSyntax))
+
+    @classmethod
+    @property
+    def else_parser(cls):
+        return SymbolParser(ElseSyntax)
+
+    @classmethod
+    @property
+    def if_parser(cls):
+        return ApplyPerser(
+            ConcatPerser(SymbolParser(IfSyntax), RepeatPerser(cls.elif_parser), OptionalPerser(cls.else_parser)),
+            cls._if,
         )
 
-        funcdef_parser = ApplyPerser(SymbolParser(McfunctionDef), cls._funcdef)
-        recursive_funcdef_parser = ApplyPerser(SymbolParser(RecursiveMcfunctionDef), cls._funcdef)
-
-        root_parser = ApplyPerser(
-            RepeatPerser(UnionPerser(execution_parser, if_parser, funcdef_parser, recursive_funcdef_parser)), cls._root
+    @classmethod
+    @property
+    def root_parser(cls):
+        return ApplyPerser(
+            RepeatPerser(UnionPerser(cls.expression_parser, cls.if_parser, cls.funcdef_parser)), cls._root
         )
 
-        return root_parser.parseAll(statements)
+    @classmethod
+    def parseAll(cls, statements: list[SyntaxStatement | SyntaxExecution]) -> T:
+        return cls.root_parser.parseAll(statements)
 
     @classmethod
     @abstractmethod
@@ -54,6 +75,11 @@ class SyntaxParser(Generic[T], metaclass=ABCMeta):
         arg: tuple[IfSyntax | ElifSyntax, list[tuple[list[SyntaxExecution], ElifSyntax]], ElseSyntax | None],
     ) -> ContextStatement:
         pass
+
+    @classmethod
+    @property
+    def funcdef_parser(cls):
+        return ApplyPerser(UnionPerser(SymbolParser(McfunctionDef), SymbolParser(RecursiveMcfunctionDef)), cls._funcdef)
 
     @classmethod
     @abstractmethod
