@@ -1,9 +1,10 @@
 from __future__ import annotations
-from math import ceil, log
+from math import ceil, floor, log
 from builder.base.context import ContextScope
 from builder.base.fragment import Fragment
 from builder.base.variable import Assign
 from builder.syntax.general import LazyAction
+from builder.util.id import intId
 from builder.util.effect import CallFragment
 from builder.util.nbt import nbt_match_path
 from builder.variable.Byte import Byte
@@ -34,23 +35,23 @@ class BineryTree:
                 self.__entry = Fragment()
                 return
 
-            fragments = [Fragment(True) for _ in range(self.__len - 1)] + self.__funcs
+            fragments = [Fragment() for _ in range(self.__len - 1)] + self.__funcs
 
-            for i in range(self.__len - 1):
+            for i in range(self.__len - 2, -1, -1):
+                j = floor(log(i + 1, 2))
                 fragment = fragments[i]
-                l_fragment = fragments[i * 2 + 1]
-                l_path = nbt.match(NbtCompoundTagArgument({f"{i:x}": NbtByteTagArgument(0)}))
-                l_call = ExecuteCommand(
-                    [ConditionSubCommand("if", NbtConditionArgument(l_path))], l_fragment.call_command()
-                )
-                fragment.append(l_call)
 
-                r_fragment = fragments[i * 2 + 2]
-                r_path = nbt.match(NbtCompoundTagArgument({f"{i:x}": NbtByteTagArgument(1)}))
-                r_call = ExecuteCommand(
-                    [ConditionSubCommand("if", NbtConditionArgument(r_path))], r_fragment.call_command()
-                )
-                fragment.append(r_call)
+                def call(callant: Fragment, match: int):
+                    match_path = nbt.match(NbtCompoundTagArgument({intId(j): NbtByteTagArgument(match)}))
+                    call_command = callant.call_command()
+                    if call_command:
+                        cmd = ExecuteCommand(
+                            [ConditionSubCommand("if", NbtConditionArgument(match_path))], call_command
+                        )
+                        fragment.append(cmd)
+
+                call(fragments[i * 2 + 1], 0)
+                call(fragments[i * 2 + 2], 1)
 
             self.__entry = fragments[0]
 
@@ -73,7 +74,7 @@ class BineryTree:
             digits.append(n % 2 == 1)
             n //= 2
         digits.reverse()
-        return NbtCompoundTagArgument({f"{i:x}": NbtByteTagArgument(int(digit)) for i, digit in enumerate(digits)})
+        return NbtCompoundTagArgument({intId(i): NbtByteTagArgument(int(digit)) for i, digit in enumerate(digits)})
 
     def Call(self, id: Assign[Compound]):
         """idの値に応じて実行先を変更する"""
