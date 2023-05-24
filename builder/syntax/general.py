@@ -9,7 +9,7 @@ T = TypeVar("T")
 
 
 # 値を計算するためにコマンドを実行する必要がある場合
-class WithSideEffect(SyntaxExecution, Generic[T]):
+class LazyCalc(SyntaxExecution, Generic[T]):
     def __init__(self, effect: Callable[[Fragment, ContextScope], T]) -> None:
         SyntaxStack.append(self)
         self.effect = effect

@@ -5,7 +5,7 @@ from builder.syntax.Elif import Elif
 from builder.syntax.Function import Mcfunction
 from builder.syntax.If import If
 from builder.syntax.Sleep import Sleep
-from builder.variable.int import Int, IntVariable
+from builder.variable.Int import Int
 from minecraft.command.argument.resource_location import ResourceLocation
 
 # a = Int.New(100)
@@ -17,16 +17,22 @@ from minecraft.command.argument.resource_location import ResourceLocation
 # with Else:
 #     b = Int.New(320)
 
-
-@Mcfunction(recursive=True)
-def test(a: Int) -> IntVariable:
-    b = Int.New(a)
-    c = Int.New(12)
-    return c
+t = Int.New(320)
 
 
-k = Int.New(1023)
+# @Mcfunction(recursive=True)
+# def a() -> None:
+#     b()
 
-test(k)
+
+@Mcfunction("unchi")
+def a() -> None:
+    Int.New(12901)
+    Int.New(12901)
+    Int.New(12901)
+    Int.New(12901)
+
+
+a()
 
 export(Path(), "txc")

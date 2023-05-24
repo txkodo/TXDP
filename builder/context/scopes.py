@@ -33,15 +33,16 @@ class BaseContextScope(ContextScope):
         return self._allocate_with_id(nbtId())
 
     def _clear(self):
-        if self._allocated:
-            return [DataRemoveCommand(self.root)]
-        return []
+        return [DataRemoveCommand(self.root)]
 
 
 class _TempContextScope(BaseContextScope):
     @property
     def root(self):
         return self._storage.root("T")
+
+    def _clear(self):
+        return [DataRemoveCommand(self.root)]
 
 
 tempContextScope = _TempContextScope()
@@ -52,6 +53,11 @@ class SyncContextScope(BaseContextScope):
     def root(self):
         return self._storage.root("S").attr(self.get_id())
 
+
+    def _clear(self):
+        if self._allocated:
+            return [DataRemoveCommand(self.root)]
+        return []
 
 class SyncRecursiveContextScope(SyncContextScope):
     @property

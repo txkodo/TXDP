@@ -1,29 +1,30 @@
 import inspect
 from typing import Callable, get_args, get_origin
-from builder.base.variable import Variable, VariableType
+
+from builder.variable.base import BaseVariable
 
 
-def extract_function_signeture(func: Callable) -> tuple[list[type[Variable]], list[type[Variable]]]:
+def extract_function_signeture(func: Callable) -> tuple[list[type[BaseVariable]], list[type[BaseVariable]]]:
     """関数の型定義から引数と戻り値の型のtupleを取得"""
     signeture = inspect.signature(func)
-    args: list[type[Variable]] = []
+    args: list[type[BaseVariable]] = []
     for p in signeture.parameters.values():
         annotation = p.annotation
-        assert issubclass(annotation, VariableType)
-        args.append(annotation._variable)
+        assert issubclass(annotation, BaseVariable)
+        args.append(annotation._assign_type)
 
-    return_types: list[type[Variable]] = []
+    return_types: list[type[BaseVariable]] = []
 
     return_annotation = signeture.return_annotation
 
     if return_annotation is None:
         pass
-    elif issubclass(return_annotation, Variable):
+    elif issubclass(return_annotation, BaseVariable):
         return_types.append(return_annotation)
     elif issubclass(get_origin(return_annotation), tuple):
         items = get_args(return_annotation)
         for item in items:
-            assert issubclass(item, Variable)
+            assert issubclass(item, BaseVariable)
             return_types.append(item)
     else:
         raise ValueError
@@ -31,21 +32,21 @@ def extract_function_signeture(func: Callable) -> tuple[list[type[Variable]], li
     return args, return_types
 
 
-def normalize_return_value(result: None | Variable | tuple[Variable, ...]) -> list[Variable]:
-    results: list[Variable] = []
+def normalize_return_value(result: None | BaseVariable | tuple[BaseVariable, ...]) -> list[BaseVariable]:
+    results: list[BaseVariable] = []
     match result:
         case None:
             pass
-        case Variable():
+        case BaseVariable():
             results.append(result)
         case tuple():
             for i in results:
-                assert isinstance(i, Variable)
+                assert isinstance(i, BaseVariable)
                 results.append(i)
     return results
 
 
-def denormalize_return_value(result: tuple[Variable]) -> None | Variable | tuple[Variable, ...]:
+def denormalize_return_value(result: tuple[BaseVariable]) -> None | BaseVariable | tuple[BaseVariable, ...]:
     match len(result):
         case 0:
             return None

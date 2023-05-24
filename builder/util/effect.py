@@ -1,13 +1,11 @@
 from typing import Literal
 from builder.base.context import ContextScope
 from builder.base.fragment import Fragment
-from builder.variable.general import WithSideEffect
-from minecraft.command.argument.nbt import NbtArgument
-from minecraft.command.command.data import DataModifyFromSource, DataSetCommand
+from builder.syntax.general import LazyCalc
 
 
 def CallFragment(fragment: Fragment[Literal[True]] | Fragment[Literal[True]]):
-    @WithSideEffect
+    @LazyCalc
     def _(f: Fragment, _):
         call = fragment.call_command()
         if call is not None:
@@ -17,6 +15,6 @@ def CallFragment(fragment: Fragment[Literal[True]] | Fragment[Literal[True]]):
 def ClearScope(scope: ContextScope):
     """スコープを削除"""
 
-    @WithSideEffect
+    @LazyCalc
     def _(fragment: Fragment, s: ContextScope):
         fragment.append(*scope._clear())
