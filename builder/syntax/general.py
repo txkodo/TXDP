@@ -45,10 +45,10 @@ class LazyCommands(SyntaxExecution, Generic[T]):
 
 
 class LazyAction(SyntaxExecution, Generic[T]):
-    def __init__(self, effect: Callable[[], None]) -> None:
+    def __init__(self, effect: Callable[[Fragment, ContextScope], None]) -> None:
         SyntaxStack.append(self)
         self.effect = effect
 
     def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
-        self.effect()
+        self.effect(fragment, scope)
         return fragment

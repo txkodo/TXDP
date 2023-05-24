@@ -45,8 +45,6 @@ def export(
     OnConstructSyntax.invoke()
     AfterConstructSyntax.invoke()
 
-    print(RootSyntax)
-
     change_phase(ExportPhase.SyntaxToContext)
 
     rootContext = convert_root(RootSyntax)
@@ -69,5 +67,7 @@ def export(
         func = fragment.export()
         if func is not None:
             funcs.append(func)
+
+    print(funcs)
 
     Datapack(path, funcs).export()

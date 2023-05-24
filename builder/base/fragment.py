@@ -90,6 +90,14 @@ class Fragment(Generic[B]):
 
         return command
 
+    def embed(self, fragment: Fragment):
+        if self._must_export:
+            _self: Fragment = self
+            command = _self.call_command()
+            if command is not None:
+                fragment.append(command)
+        fragment.append(*self._commands)
+
     def append(self, *command: Command):
         if self._lock:
             ValueError("self.must_export needs to be True")

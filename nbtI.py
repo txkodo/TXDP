@@ -1,13 +1,10 @@
-from typing import TypeVar, TypeVarTuple
+
+def to_binary(value, digit):
+    result = []
+    for i in range(digit):
+        result.append(bool(value & (1 << i)))
+    return result
 
 
-P = TypeVarTuple("P")
-
-T = TypeVar("T")
-
-
-def a(*a: *P) -> tuple[*P]:
-    return a
-
-
-k = a(2, "a")
+result = to_binary(3, 4)
+print(result)
