@@ -32,10 +32,7 @@ for i in range(arg):
 
         over += f"""
     @overload
-    def __call__(self: Mcfunction[Literal[False]], func: Callable[[{p_in}], {r_in}]) -> McfunctionDef[{p_out}{r_out}]:pass
-
-    @overload
-    def __call__(self: Mcfunction[Literal[True]], func: Callable[[{p_in}], {r_in}]) -> RecursiveMcfunctionDef[{p_out}{r_out}]:pass
+    def __call__(self: Mcfunction[Literal[False]], func: Callable[[{p_in}], {r_in}]) -> AsyncMcfunctionDef[{p_out}{r_out}]:pass
     """
 
 Path("over.txt").write_text(over)

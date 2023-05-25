@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import ClassVar, Generic, Literal, TypeVar, overload
 from builder.declare.id_generator import functionId
+from builder.export.phase import InContextToDatapackPhase
 from minecraft.command.argument.resource_location import ResourceLocation
 from minecraft.command.base import Command
 from minecraft.command.command.function import FunctionCommand
@@ -51,7 +52,6 @@ class Fragment(Generic[B]):
 
         if _location in fragment_map:
             return fragment_map[_location]
-        
 
         self = super().__new__(cls)
         self._location = _location
@@ -70,9 +70,6 @@ class Fragment(Generic[B]):
     def export(self):
         if self._need_export:
             return Function(self.get_location(), self._commands)
-            # l = self.get_location()
-            # log = LiteralCommand(f"say {l}")
-            # return Function(l, [*self._commands,log])
         return None
 
     def get_location(self):
@@ -88,6 +85,7 @@ class Fragment(Generic[B]):
     def call_command(self: Fragment[Literal[False]]) -> Command | None:
         pass
 
+    @InContextToDatapackPhase
     def call_command(self) -> Command | None:
         if hasattr(self, "_call_command"):
             return self._call_command
@@ -111,5 +109,4 @@ class Fragment(Generic[B]):
     def append(self, *command: Command):
         if self._lock:
             ValueError("self.must_export needs to be True")
-
         self._commands.extend(command)

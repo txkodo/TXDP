@@ -1,16 +1,10 @@
-from pathlib import Path
-from builder.base.fragment import Fragment
 from builder.object.event import Event
 from builder.syntax.AsyncFunction import AsyncMcfunction
 from builder.export.export import export
-from builder.syntax.Else import Else
 from builder.syntax.Function import Mcfunction
-from builder.syntax.If import If
 from builder.syntax.Promise import Await, AwaitAll
 from builder.syntax.Run import Run
 from builder.syntax.Sleep import Sleep
-from builder.syntax.general import LazyCommand
-from builder.variable.Byte import Byte
 from minecraft.command.command.literal import LiteralCommand
 from path import DATAPACK_PATH
 
@@ -47,5 +41,7 @@ def invoke() -> None:
     event.Invoke()
 
 
-export(DATAPACK_PATH, "txc")
+if __name__ == "__main__":
+    export(DATAPACK_PATH, "txc")
+
 # export(Path(), "txc")

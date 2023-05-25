@@ -12,7 +12,7 @@ from builder.context.sync import SyncFuncdefContextStatement
 from builder.converter.base import SyntaxParser
 from builder.converter.perser_def import ApplyPerser, RepeatPerser, SymbolParser, UnionPerser
 from builder.converter.sync import SyncSyntaxParser
-from builder.syntax.AsyncFunctionDef import ContinueWithSyntax
+from builder.syntax.Continue import ContinueWithSyntax
 from builder.syntax.Elif import ElifSyntax
 from builder.syntax.Else import ElseSyntax
 from builder.syntax.FunctionDef import McfunctionDef, RecursiveMcfunctionDef

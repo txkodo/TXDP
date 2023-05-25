@@ -90,25 +90,6 @@ class SyncRecursiveContextScope(SyncContextScope):
         return self._allocate_with_id(id), tempContextScope._allocate_with_id(id)
 
 
-class AsyncRecursiveContextScope(AsyncContextScope):
-    @property
-    def stack_root(self):
-        return self._storage.root("A").attr(self.get_id())
-
-    @property
-    def root(self):
-        return self.stack_root.item(-1)
-
-    def _allocate(self) -> NbtArgument:
-        result = self.root.attr("_").attr(nbtId())
-        self._allocated.append(result)
-        return result
-
-    def _allocate_with_temp(self):
-        id = nbtId()
-        return self._allocate_with_id(id), tempContextScope._allocate_with_id(id)
-
-
 class NullContextScope(ContextScope):
     @property
     def _storage(self):
@@ -120,5 +101,6 @@ class NullContextScope(ContextScope):
     @abstractmethod
     def _clear(self) -> list[Command]:
         raise NotImplementedError
+
 
 nullContextScope = NullContextScope()
