@@ -9,8 +9,8 @@ from builder.context.sync import (
 )
 from builder.converter.base import SyntaxParser
 from builder.converter.perser_def import ApplyPerser, RepeatPerser, SymbolParser, UnionPerser
-from builder.syntax.Elif import ElifSyntax
-from builder.syntax.Else import ElseSyntax
+from builder.syntax.Elif import _ElifSyntax, _BeforeElifSyntax
+from builder.syntax.Else import _ElseSyntax
 from builder.syntax.FunctionDef import McfunctionDef, RecursiveMcfunctionDef
 from builder.syntax.If import IfSyntax
 
@@ -20,7 +20,12 @@ T = TypeVar("T", bound=ContextStatement)
 class SyncSyntaxParser(SyntaxParser[SyncContextStatement]):
     @classmethod
     def _if(
-        cls, arg: tuple[IfSyntax | ElifSyntax, list[tuple[list[SyntaxExecution], ElifSyntax]], ElseSyntax | None]
+        cls,
+        arg: tuple[
+            IfSyntax | _ElifSyntax,
+            list[tuple[_BeforeElifSyntax, list[SyntaxExecution], _ElifSyntax]],
+            _ElseSyntax | None,
+        ],
     ) -> ContextStatement:
         _if, _elifs, _else = arg
 
@@ -34,7 +39,7 @@ class SyncSyntaxParser(SyntaxParser[SyncContextStatement]):
             _else_contents = cls.parseAll(_else._statements)
             return SyncConditionContextStatement(_if.condition, _if_contents, _else_contents)
 
-        [_elif_before, _elif_main], *_elifs = _elifs
+        [_, _elif_before, _elif_main], *_elifs = _elifs
 
         _else_contents = SyncContextStatement([*_elif_before, cls._if((_elif_main, _elifs, _else))])
         return SyncConditionContextStatement(_if.condition, _if_contents, _else_contents)

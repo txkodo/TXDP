@@ -4,7 +4,7 @@ from builder.base.syntax import SyntaxBlock, SyntaxStack
 
 class ElseMeta(type):
     def __enter__(self):
-        result = ElseSyntax()
+        result = _ElseSyntax()
         SyntaxStack.append(result)
         SyntaxStack.push(result)
 
@@ -12,10 +12,10 @@ class ElseMeta(type):
         SyntaxStack.pop()
 
 
-class Else(metaclass=ElseMeta):
+class _Else(metaclass=ElseMeta):
     pass
 
 
 @dataclass
-class ElseSyntax(SyntaxBlock):
+class _ElseSyntax(SyntaxBlock):
     pass

@@ -1,14 +1,11 @@
 from dataclasses import dataclass
 from builder.base.context import ContextScope, ContextStatement
 from builder.base.fragment import Fragment
+from builder.command.execute_builder import Execute
 from builder.context.general import BLockContextStatement
-from builder.context.scopes import AsyncContextScope, SyncContextScope
-from builder.context.sync import SyncContextStatement
-from builder.util.command import data_remove, data_set, data_set_value, execute_if_match
-from builder.util.nbt import nbt_match_path
+from builder.context.scopes import AsyncContextScope
+from builder.variable.Byte import Byte
 from builder.variable.condition import NbtCondition
-from minecraft.command.argument.nbt_tag import NbtByteTagArgument
-from minecraft.command.command.execute import ExecuteCommand
 from minecraft.command.command.schedule import ScheduleCommand
 
 
@@ -18,41 +15,32 @@ class AsyncContextStatement(BLockContextStatement):
 
 
 @dataclass
-class AsyncIfContextStatement(ContextStatement):
-    _condition: NbtCondition
-    _if: AsyncContextStatement
-
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
-        if_fragment = Fragment()
-        self._if._evalate(if_fragment, scope)
-        if_call = if_fragment.call_command()
-        if if_call:
-            fragment.append(ExecuteCommand([self._condition.sub_command()], if_call))
-        return fragment
-
-
-@dataclass
 class AsyncConditionContextStatement(ContextStatement):
     _condition: NbtCondition
     _if: AsyncContextStatement
     _else: AsyncContextStatement
 
     def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
-        if_fragment = Fragment()
-        if_return = self._if._evalate(if_fragment, scope)
-        assert if_fragment is if_return
-        if_call = if_fragment.call_command()
-        if if_call:
-            fragment.append(ExecuteCommand([self._condition.sub_command()], if_call))
+        exit = Fragment(True)
 
-        else_fragment = Fragment()
-        else_return = self._else._evalate(else_fragment, scope)
-        assert else_fragment is else_return
-        else_call = else_fragment.call_command()
+        tmp = Byte(allocator=scope._allocate)
+        setnbt = Execute.If(self._condition).run_command(tmp.set_command(1))
+        fragment.append(setnbt())
+
+        else_entry = Fragment()
+        self._else._evalate(else_entry, scope).append(exit.call_command())
+
+        else_call = else_entry.call_command()
         if else_call:
-            fragment.append(ExecuteCommand([self._condition.Not().sub_command()], else_call))
+            fragment.append(Execute.Unless(tmp.exists()).run_command(else_call)())
 
-        return fragment
+        if_entry = Fragment()
+        self._if._evalate(if_entry, scope).append(exit.call_command())
+
+        if_call = if_entry.call_command()
+        if if_call:
+            fragment.append(Execute.If(tmp.exists()).run_command(if_call)())
+        return exit
 
 
 @dataclass
@@ -89,15 +77,13 @@ class AsyncListenContextStatement(ContextStatement):
     _fragment: Fragment
 
     def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
-        nbt = scope._allocate()
-        v1b = NbtByteTagArgument(1)
-        fragment.append(data_set_value(nbt, v1b))
+        nbt = Byte(allocator=scope._allocate)
+        fragment.append(nbt.set_command(1)())
 
         _cont = Fragment(True)
 
-        cmd = execute_if_match(nbt, v1b, _cont.call_command())
-
+        cmd = Execute.If(nbt.matches(1)).run_command(_cont.call_command)()
         self._fragment.append(cmd)
 
-        _cont.append(data_remove(nbt))
+        _cont.append(nbt.remove_command()())
         return _cont

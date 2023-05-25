@@ -1,10 +1,13 @@
 from __future__ import annotations
+from abc import abstractmethod
 from typing import Callable, Generic, Protocol, Self, TypeVar, runtime_checkable
 from builder.base.context import ContextScope
 from builder.base.fragment import Fragment
+from builder.export.phase import InContextToDatapackPhase
 from builder.util.command import data_set
-from builder.syntax.general import LazyCalc
+from builder.syntax.general import LazyAction, LazyCalc
 from minecraft.command.argument.nbt import NbtArgument
+from minecraft.command.base import Command
 
 
 class Variable:
@@ -14,44 +17,38 @@ class Variable:
 
     _assign_type: type[Self]
     _nbt: NbtArgument | None
-    _allocator: Callable[[], NbtArgument] | bool
-    _unsafe: bool
+    __allocator: Callable[[], NbtArgument] | None
 
     def __init_subclass__(cls) -> None:
         cls._assign_type = cls
         return super().__init_subclass__()
 
-    def __new__(
-        cls, nbt: NbtArgument | None = None, allocator: Callable[[], NbtArgument] | bool = True, unsafe: bool = False
-    ) -> Self:
+    def __new__(cls, nbt: NbtArgument | None = None, allocator: Callable[[], NbtArgument] | None = None) -> Self:
         self = super().__new__(cls)
         self._nbt = nbt
-        self._allocator = allocator
-        self._unsafe = unsafe
+        self.__allocator = allocator
 
-        if allocator is True:
+        if allocator is None:
             # 実行時点のスコープで自動アロケート
-            @LazyCalc
+            @LazyAction
             def _(_: Fragment, scope: ContextScope):
-                self._allocator = scope._allocate
+                self.__allocator = scope._allocate
 
         return self
 
-    def _get_nbt(self, generate: bool):
-        if isinstance(self._nbt, NbtArgument):
-            return self._nbt
-        if not (self._unsafe or generate):
-            raise AssertionError
-        if self._allocator is True:
-            raise AssertionError
-        if self._allocator is False:
-            raise AssertionError
-        self._nbt = self._allocator()
+    @property
+    @InContextToDatapackPhase
+    def nbt(self):
+        if self._nbt is None:
+            assert self.__allocator is not None
+            self._nbt = self.__allocator()
         return self._nbt
 
+    def _assign_command(self, target: NbtArgument):
+        return data_set(target, self.nbt)
+
     def _assign(self, target: NbtArgument, fragment: Fragment, scope: ContextScope):
-        cmd = data_set(target, self._get_nbt(self._unsafe))
-        fragment.append(cmd)
+        fragment.append(self._assign_command(target))
 
 
 V = TypeVar("V", bound=Variable)
@@ -62,4 +59,13 @@ class Assign(Protocol, Generic[V]):
     _assign_type: type[V]
 
     def _assign(self, target: NbtArgument, fragment: Fragment, scope: ContextScope) -> None:
+        pass
+
+
+@runtime_checkable
+class AssignOneline(Protocol, Generic[V]):
+    _assign_type: type[V]
+
+    @abstractmethod
+    def _assign_command(self, target: NbtArgument) -> Command:
         pass

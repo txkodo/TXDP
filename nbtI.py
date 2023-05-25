@@ -1,10 +1,15 @@
-
-def to_binary(value, digit):
-    result = []
-    for i in range(digit):
-        result.append(bool(value & (1 << i)))
-    return result
+from asyncio import run, sleep
+import time
 
 
-result = to_binary(3, 4)
-print(result)
+async def t():
+    t = time.time()
+    a5 = sleep(5)
+    a3 = sleep(3)
+    await a3
+    print(time.time() - t)
+    await a5
+    print(time.time() - t)
+
+
+run(t())

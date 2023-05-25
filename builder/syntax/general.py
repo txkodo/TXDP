@@ -23,6 +23,25 @@ class LazyCalc(SyntaxExecution, Generic[T]):
 
 
 # 値を計算するためにコマンドを実行する必要がある場合
+class LazyFreeCalc(SyntaxExecution, Generic[T]):
+    def __init__(self, effect: Callable[[], T]) -> None:
+        SyntaxStack.append(self)
+        self.effect = effect
+
+    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+        if hasattr(self, "result"):
+            self.result
+        self.result = self.effect()
+        return fragment
+
+    def __call__(self) -> T:
+        if hasattr(self, "result"):
+            self.result
+        self.result = self.effect()
+        return self.result
+
+
+# 値を計算するためにコマンドを実行する必要がある場合
 class LazyCommand(SyntaxExecution, Generic[T]):
     def __init__(self, effect: Callable[[], Command]) -> None:
         SyntaxStack.append(self)

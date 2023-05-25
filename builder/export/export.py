@@ -57,7 +57,7 @@ def export(
 
     scope = RootContextScope()
 
-    init.append(scope._clean())
+    scope.clear_all_scope(init)
 
     # syntax -> *fragment
     rootContext._evalate(init, scope)

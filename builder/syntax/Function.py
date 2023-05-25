@@ -110,9 +110,7 @@ class Mcfunction(Generic[X]):
         pass
 
     @overload
-    def __call__(
-        self: Mcfunction[Literal[False]], func: Callable[[P0], Assign[R0]]
-    ) -> McfunctionDef[Assign[P0], R0]:
+    def __call__(self: Mcfunction[Literal[False]], func: Callable[[P0], Assign[R0]]) -> McfunctionDef[Assign[P0], R0]:
         pass
 
     @overload

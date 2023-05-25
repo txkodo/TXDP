@@ -6,6 +6,7 @@ from builder.base.variable import Assign
 from builder.context.scopes import AsyncContextScope
 from builder.syntax.AsyncFunctionDef import AsyncMcfunctionDef
 from builder.util.function import extract_function_signeture
+from builder.util.variable import belongs_to
 from builder.variable.base import BaseVariable
 from minecraft.command.argument.resource_location import ResourceLocation
 
@@ -196,7 +197,7 @@ class AsyncMcfunction(Generic[X]):
         arg_types, return_types = extract_function_signeture(func)
         entry_point = Fragment(False if self.location is None else self.location)
         scope = AsyncContextScope()
-        args = [type(allocator=scope._allocate) for type in arg_types]
+        args = [belongs_to(type, scope) for type in arg_types]
         result = AsyncMcfunctionDef(args, return_types, scope, func, entry_point)
         SyntaxStack.append(result)
         return result

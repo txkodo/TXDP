@@ -208,4 +208,8 @@ class ApplyPerser(Parser[T]):
         if content is None:
             return None
         input, result = content
-        return input, self.func(result)
+        try:
+            result = self.func(result)
+            return input, result
+        except:
+            return None

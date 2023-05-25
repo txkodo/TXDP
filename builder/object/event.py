@@ -19,8 +19,7 @@ class Event:
             case _:
                 self._fragment = Fragment(location)
 
-        self.state = Byte(allocator=False)
-        belongs_to(self.state, EventContextScope)
+        self.state = belongs_to(Byte, EventContextScope)
 
         with WithFragment(self._fragment):
             self.state.Set(0)
@@ -58,6 +57,11 @@ class _EventContextScope(BaseContextScope):
 
     def _clear(self):
         return [DataRemoveCommand(self.root)]
+
+    @classmethod
+    def _clear_all(cls):
+        """すべてのスコープをリセット"""
+        return [DataRemoveCommand(cls.storage().root("e"))]
 
 
 EventContextScope = _EventContextScope()

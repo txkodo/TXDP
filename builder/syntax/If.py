@@ -3,7 +3,7 @@ from builder.base.syntax import SyntaxBlock, SyntaxStack
 from builder.variable.condition import NbtCondition
 
 
-class If:
+class _If:
     def __init__(self, condition: NbtCondition) -> None:
         self.condition = condition
 

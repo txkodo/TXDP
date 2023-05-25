@@ -12,7 +12,7 @@ else:
 class Compound(BaseVariable[dict[str, BaseValue], CompoundValue]):
     def child(self, type: type[BaseVariable], name: str):
         def allocator():
-            return self._get_nbt(True).attr(name)
+            return self.nbt.attr(name)
 
         return type(allocator=allocator)
 

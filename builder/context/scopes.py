@@ -36,6 +36,11 @@ class BaseContextScope(ContextScope):
     def _clear(self):
         return [DataRemoveCommand(self.root)]
 
+    @classmethod
+    def _clear_all(cls) -> list[Command]:
+        """すべてのスコープをリセット"""
+        return []
+
 
 class _TempContextScope(BaseContextScope):
     @property
@@ -44,6 +49,11 @@ class _TempContextScope(BaseContextScope):
 
     def _clear(self):
         return [DataRemoveCommand(self.root)]
+
+    @classmethod
+    def _clear_all(cls) -> list[Command]:
+        """すべてのスコープをリセット"""
+        return [DataRemoveCommand(cls.storage().root("t"))]
 
 
 tempContextScope = _TempContextScope()
@@ -59,6 +69,11 @@ class SyncContextScope(BaseContextScope):
             return [DataRemoveCommand(self.root)]
         return []
 
+    @classmethod
+    def _clear_all(cls) -> list[Command]:
+        """すべてのスコープをリセット"""
+        return [DataRemoveCommand(cls.storage().root("s"))]
+
 
 class AsyncContextScope(BaseContextScope):
     @property
@@ -69,6 +84,11 @@ class AsyncContextScope(BaseContextScope):
         if self._allocated:
             return [DataRemoveCommand(self.root)]
         return []
+
+    @classmethod
+    def _clear_all(cls) -> list[Command]:
+        """すべてのスコープをリセット"""
+        return [DataRemoveCommand(cls.storage().root("a"))]
 
 
 class SyncRecursiveContextScope(SyncContextScope):
@@ -89,6 +109,11 @@ class SyncRecursiveContextScope(SyncContextScope):
         id = nbtId()
         return self._allocate_with_id(id), tempContextScope._allocate_with_id(id)
 
+    @classmethod
+    def _clear_all(cls) -> list[Command]:
+        """すべてのスコープをリセット"""
+        return [DataRemoveCommand(cls.storage().root("S"))]
+
 
 class NullContextScope(ContextScope):
     @property
@@ -101,6 +126,11 @@ class NullContextScope(ContextScope):
     @abstractmethod
     def _clear(self) -> list[Command]:
         raise NotImplementedError
+
+    @classmethod
+    def _clear_all(cls) -> list[Command]:
+        """すべてのスコープをリセット"""
+        return []
 
 
 nullContextScope = NullContextScope()

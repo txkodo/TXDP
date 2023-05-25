@@ -3,12 +3,14 @@ from builder.base.syntax import SyntaxBlock, SyntaxStack, SyntaxStatement
 from builder.variable.condition import NbtCondition
 
 
-class _Elif:
+class _While:
     def __init__(self, condition: NbtCondition) -> None:
         self.condition = condition
 
+    condition: NbtCondition
+
     def __enter__(self):
-        result = _ElifSyntax(self.condition)
+        result = _WhileSyntax(self.condition)
         SyntaxStack.append(result)
         SyntaxStack.push(result)
 
@@ -17,10 +19,9 @@ class _Elif:
 
 
 @dataclass
-class _ElifSyntax(SyntaxBlock):
-    condition: NbtCondition
-
+class _BeforeWhileSyntax(SyntaxStatement):
+    pass
 
 @dataclass
-class _BeforeElifSyntax(SyntaxStatement):
-    pass
+class _WhileSyntax(SyntaxBlock):
+    condition: NbtCondition

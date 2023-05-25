@@ -10,10 +10,11 @@ from builder.converter.perser_def import (
     SymbolParser,
     UnionPerser,
 )
-from builder.syntax.Elif import ElifSyntax
-from builder.syntax.Else import ElseSyntax
+from builder.syntax.Elif import _ElifSyntax, _BeforeElifSyntax
+from builder.syntax.Else import _ElseSyntax
 from builder.syntax.FunctionDef import McfunctionDef, RecursiveMcfunctionDef
 from builder.syntax.If import IfSyntax
+from builder.syntax.While import _WhileSyntax
 
 T = TypeVar("T", bound=ContextStatement)
 
@@ -37,12 +38,12 @@ class SyntaxParser(Generic[T], metaclass=ABCMeta):
     @classmethod
     @property
     def elif_parser(cls):
-        return ConcatPerser(cls.expressions_parser, SymbolParser(ElifSyntax))
+        return ConcatPerser(SymbolParser(_BeforeElifSyntax), cls.expressions_parser, SymbolParser(_ElifSyntax))
 
     @classmethod
     @property
     def else_parser(cls):
-        return SymbolParser(ElseSyntax)
+        return SymbolParser(_ElseSyntax)
 
     @classmethod
     @property
@@ -51,6 +52,16 @@ class SyntaxParser(Generic[T], metaclass=ABCMeta):
             ConcatPerser(SymbolParser(IfSyntax), RepeatPerser(cls.elif_parser), OptionalPerser(cls.else_parser)),
             cls._if,
         )
+
+    @classmethod
+    @property
+    def while_parser(cls):
+        return SymbolParser(_WhileSyntax)
+
+    @classmethod
+    @property
+    def dowhile_parser(cls):
+        return SymbolParser(_WhileSyntax)
 
     @classmethod
     @property
@@ -72,7 +83,11 @@ class SyntaxParser(Generic[T], metaclass=ABCMeta):
     @abstractmethod
     def _if(
         cls,
-        arg: tuple[IfSyntax | ElifSyntax, list[tuple[list[SyntaxExecution], ElifSyntax]], ElseSyntax | None],
+        arg: tuple[
+            IfSyntax | _ElifSyntax,
+            list[tuple[_BeforeElifSyntax, list[SyntaxExecution], _ElifSyntax]],
+            _ElseSyntax | None,
+        ],
     ) -> ContextStatement:
         pass
 

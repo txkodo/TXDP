@@ -24,3 +24,8 @@ class RootContextScope(ContextScope):
 
     def _clean(self):
         return DataRemoveCommand(self.root)
+
+    @classmethod
+    def _clear_all(cls):
+        """すべてのスコープをリセット"""
+        return [DataRemoveCommand(cls.storage().root("A"))]

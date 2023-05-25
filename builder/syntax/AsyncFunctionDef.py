@@ -34,8 +34,7 @@ class AsyncMcfunctionDef(SyntaxBlock, Generic[*P, R]):
         on_before_convert(self.evaluate)
 
         # 関数の処理が終わった後に継続を選択するための二分木
-        self.id = Compound(allocator=False)
-        belongs_to(self.id, self.scope)
+        self.id = belongs_to(Compound, self.scope)
         self.tree = BineryTree(self.id)
 
     @InCodeToSyntaxPhase
@@ -55,7 +54,7 @@ class AsyncMcfunctionDef(SyntaxBlock, Generic[*P, R]):
     def _create_promise(self, cont: Fragment, *args: *P) -> tuple[ServerPromise[R], BinaryTreeId]:
         """ServerPromiseを生成"""
         assert is_variable_list(args)
-        returns = [type(allocator=True) for type in self.return_types]
+        returns = [type() for type in self.return_types]
 
         # 引数を設定
         for target_arg, source_arg in zip2(self.args, args):

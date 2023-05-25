@@ -1,11 +1,11 @@
 import base64
 from pathlib import Path
 from builder.base.fragment import Fragment
-from builder.syntax.Else import Else
+from builder.syntax.Else import _Else
 from builder.export.export import export
-from builder.syntax.Elif import Elif
+from builder.syntax.Elif import _Elif
 from builder.syntax.Function import Mcfunction
-from builder.syntax.If import If
+from builder.syntax.If import _If
 from builder.util.binery_tree import BineryTree
 from builder.variable.Compound import Compound
 from builder.variable.Int import Int

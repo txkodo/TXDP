@@ -53,7 +53,7 @@ class McfunctionDef(SyntaxBlock, Generic[*P, R]):
 
     def __call__(self, *args: *P) -> R:
         assert is_variable_list(args)
-        returns = [type(allocator=True) for type in self.return_types]
+        returns = [type() for type in self.return_types]
         self.calltask(args, returns)
         return denormalize_return_value(returns)  # type: ignore
 
@@ -90,14 +90,12 @@ class RecursiveMcfunctionDef(SyntaxBlock, Generic[*P, R]):
         source_args: list[BaseVariable] = []
         target_args: list[BaseVariable] = []
         for i in self.arg_types:
-            source_arg = i(allocator=False)
+            source_arg, target_arg = entangle((i, tempContextScope), (i, self.scope))
             source_args.append(source_arg)
-            target_arg = i(allocator=False, unsafe=True)
             target_args.append(target_arg)
-            entangle((source_arg, tempContextScope), (target_arg, self.scope))
 
         self.args = source_args
-        self.results = [belongs_to(i(allocator=False), tempContextScope) for i in self.return_types]
+        self.results = [belongs_to(i, tempContextScope) for i in self.return_types]
 
         @InCodeToSyntaxPhase
         def evaluate():
@@ -130,7 +128,7 @@ class RecursiveMcfunctionDef(SyntaxBlock, Generic[*P, R]):
 
         CallFragment(self.entry_point)
 
-        returns = [type(allocator=True) for type in self.return_types]
+        returns = [type() for type in self.return_types]
         for target, source in zip2(returns, self.results):
             target.Set(source)
 

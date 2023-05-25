@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Callable
 from builder.base.condition import Condition
 from minecraft.command.argument.condition import ConditionArgument, NbtConditionArgument
-
 from minecraft.command.argument.nbt import NbtArgument
 
 
