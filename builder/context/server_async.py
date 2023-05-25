@@ -4,8 +4,12 @@ from builder.base.fragment import Fragment
 from builder.context.general import BLockContextStatement
 from builder.context.scopes import AsyncContextScope, SyncContextScope
 from builder.context.sync import SyncContextStatement
+from builder.util.command import data_remove, data_set, data_set_value, execute_if_match
+from builder.util.nbt import nbt_match_path
 from builder.variable.condition import NbtCondition
+from minecraft.command.argument.nbt_tag import NbtByteTagArgument
 from minecraft.command.command.execute import ExecuteCommand
+from minecraft.command.command.schedule import ScheduleCommand
 
 
 @dataclass
@@ -68,3 +72,32 @@ class AsyncContinueContextStatement(ContextStatement):
 
     def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
         return self._fragment
+
+
+@dataclass
+class AsyncSleepContextStatement(ContextStatement):
+    _tick: int
+
+    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+        _continue = Fragment(True)
+        fragment.append(ScheduleCommand(_continue.get_location(), self._tick))
+        return _continue
+
+
+@dataclass
+class AsyncListenContextStatement(ContextStatement):
+    _fragment: Fragment
+
+    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+        nbt = scope._allocate()
+        v1b = NbtByteTagArgument(1)
+        fragment.append(data_set_value(nbt, v1b))
+
+        _cont = Fragment(True)
+
+        cmd = execute_if_match(nbt, v1b, _cont.call_command())
+
+        self._fragment.append(cmd)
+
+        _cont.append(data_remove(nbt))
+        return _cont

@@ -3,6 +3,7 @@ from builder.base.context import ContextScope
 from builder.declare.id_generator import nbtId
 from builder.export.phase import InContextToDatapackPhase
 from minecraft.command.argument.nbt import NbtArgument
+from minecraft.command.base import Command
 from minecraft.command.command.data import DataRemoveCommand
 
 
@@ -39,7 +40,7 @@ class BaseContextScope(ContextScope):
 class _TempContextScope(BaseContextScope):
     @property
     def root(self):
-        return self._storage.root("T")
+        return self._storage.root("t")
 
     def _clear(self):
         return [DataRemoveCommand(self.root)]
@@ -106,3 +107,18 @@ class AsyncRecursiveContextScope(AsyncContextScope):
     def _allocate_with_temp(self):
         id = nbtId()
         return self._allocate_with_id(id), tempContextScope._allocate_with_id(id)
+
+
+class NullContextScope(ContextScope):
+    @property
+    def _storage(self):
+        raise NotImplementedError
+
+    def _allocate(self) -> NbtArgument:
+        raise NotImplementedError
+
+    @abstractmethod
+    def _clear(self) -> list[Command]:
+        raise NotImplementedError
+
+nullContextScope = NullContextScope()

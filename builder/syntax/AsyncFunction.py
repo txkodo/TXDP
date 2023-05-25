@@ -30,10 +30,6 @@ class AsyncMcfunction(Generic[X]):
     recursive: bool
 
     @overload
-    def __init__(self: AsyncMcfunction[Literal[False]], location: ResourceLocation | str) -> None:
-        pass
-
-    @overload
     def __init__(self: AsyncMcfunction[Literal[False]], *, recursive: Literal[False] = False) -> None:
         pass
 
@@ -41,10 +37,8 @@ class AsyncMcfunction(Generic[X]):
     def __init__(self: AsyncMcfunction[Literal[True]], *, recursive: Literal[True]) -> None:
         pass
 
-    def __init__(self, location: ResourceLocation | str | None = None, *, recursive: bool = False) -> None:
-        if isinstance(location, str):
-            location = ResourceLocation(location)
-        self.location = location
+    def __init__(self, *, recursive: bool = False) -> None:
+        self.location = None
         self.recursive = recursive
 
     @overload

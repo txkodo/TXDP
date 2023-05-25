@@ -1,26 +1,51 @@
 from pathlib import Path
-from builder.base.variable import Assign
+from builder.base.fragment import Fragment
+from builder.object.event import Event
 from builder.syntax.AsyncFunction import AsyncMcfunction
-from builder.syntax.Else import Else
 from builder.export.export import export
-from builder.syntax.Elif import Elif
+from builder.syntax.Else import Else
 from builder.syntax.Function import Mcfunction
 from builder.syntax.If import If
-from builder.variable.Int import Int
+from builder.syntax.Promise import Await, AwaitAll
+from builder.syntax.Run import Run
+from builder.syntax.Sleep import Sleep
+from builder.syntax.general import LazyCommand
+from builder.variable.Byte import Byte
+from minecraft.command.command.literal import LiteralCommand
+from path import DATAPACK_PATH
 
 
-@AsyncMcfunction("a0")
+event = Event()
+
+
+@AsyncMcfunction()
 def a0() -> None:
-    Int.New(1)
-    Int.New(2)
+    for i in range(10):
+        Run(LiteralCommand(f"say {i}"))
+        Await(Sleep(1))
 
-@AsyncMcfunction("a1")
+
+@AsyncMcfunction()
 def a1() -> None:
-    Int.New(1)
-    a0()
-    Int.New(2)
+    for i in range(5):
+        Run(LiteralCommand(f"say [x{i}] run minecraft:event"))
+        a = a0()
+        b = event.Listen()
+        AwaitAll(a, b)
+        Run(LiteralCommand(f"say [x{i}] ok!"))
+
+    Run(LiteralCommand(f"say end"))
 
 
-a1.start()
+@Mcfunction("start")
+def start() -> None:
+    a1()
 
-export(Path(), "txc")
+
+@Mcfunction("invoke")
+def invoke() -> None:
+    event.Invoke()
+
+
+export(DATAPACK_PATH, "txc")
+# export(Path(), "txc")

@@ -89,6 +89,9 @@ B = TypeVar("B")
 C = TypeVar("C")
 D = TypeVar("D")
 E = TypeVar("E")
+F = TypeVar("F")
+G = TypeVar("G")
+H = TypeVar("H")
 
 
 class UnionPerser(Parser[T]):
@@ -111,6 +114,45 @@ class UnionPerser(Parser[T]):
     @overload
     def __init__(
         self: UnionPerser[A | B | C | D | E], a: Parser[A], b: Parser[B], c: Parser[C], d: Parser[D], e: Parser[E]
+    ) -> None:
+        pass
+
+    @overload
+    def __init__(
+        self: UnionPerser[A | B | C | D | E | F],
+        a: Parser[A],
+        b: Parser[B],
+        c: Parser[C],
+        d: Parser[D],
+        e: Parser[E],
+        f: Parser[F],
+    ) -> None:
+        pass
+
+    @overload
+    def __init__(
+        self: UnionPerser[A | B | C | D | E | F | G],
+        a: Parser[A],
+        b: Parser[B],
+        c: Parser[C],
+        d: Parser[D],
+        e: Parser[E],
+        f: Parser[F],
+        g: Parser[G],
+    ) -> None:
+        pass
+
+    @overload
+    def __init__(
+        self: UnionPerser[A | B | C | D | E | F | G | H],
+        a: Parser[A],
+        b: Parser[B],
+        c: Parser[C],
+        d: Parser[D],
+        e: Parser[E],
+        f: Parser[F],
+        g: Parser[G],
+        h: Parser[H],
     ) -> None:
         pass
 

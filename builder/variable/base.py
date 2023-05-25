@@ -4,13 +4,13 @@ from builder.base.context import ContextScope
 from builder.base.fragment import Fragment
 from builder.base.variable import V, Assign, Variable
 from builder.export.phase import InCodeToSyntaxPhase
-from builder.syntax.general import LazyCalc
+from builder.syntax.general import LazyCalc, LazyCommand
 from builder.util.command import data_set, store_success_byte
 from builder.util.nbt import nbt_match_path
 from builder.variable.condition import NbtCondition
 from minecraft.command.argument.nbt import NbtArgument
 from minecraft.command.argument.nbt_tag import NbtByteTagArgument, NbtTagArgument
-from minecraft.command.command.data import DataModifyValueSource, DataSetCommand
+from minecraft.command.command.data import DataModifyValueSource, DataRemoveCommand, DataSetCommand
 
 
 T = TypeVar("T", bound=int | float | str | list | dict)
@@ -74,6 +74,10 @@ class BaseVariable(Variable, Generic[T, B]):
         return result
 
     @InCodeToSyntaxPhase
+    def Remove(self):
+        LazyCommand(lambda: DataRemoveCommand(self._get_nbt(False)))
+
+    @InCodeToSyntaxPhase
     def Set(self, value: Assign[Self] | T):
         if not isinstance(value, Assign):
             value = self._value_type(value)
@@ -93,8 +97,46 @@ class BaseVariable(Variable, Generic[T, B]):
 
         return NbtCondition(True, result)
 
+    def exists(self):
+        """
+        このパスが存在するかをチェックする
+
+        処理がない代わりに安全ではないので
+        基本的には.Exists(value)を使用すること
+
+        参照渡しっぽい感じなので、後からこのパスの値が設定/削除された場合も反映されてしまうため注意
+        """
+        return NbtCondition(True, lambda: self._get_nbt(True))
+
+    def matches(self, value: T):
+        """
+        このパスが値にマッチするかをチェックする
+
+        処理がない代わりに安全ではないので
+        基本的には.Matches(value)を使用すること
+
+        注:このパスがNbtMatchPath/NbtRootMatchPathに変換可能である必要がある
+        self:foo.bar,value:1b -> foo{bar:1b} OK!
+        self:foo[0] ,value:1b -> ERROR       NG!
+
+        参照渡しっぽい感じなので、後からこのパスの値が更新された場合も反映されてしまうため注意
+        """
+
+        @LazyCalc
+        def result(fragment: Fragment, scope: ContextScope) -> NbtArgument:
+            match = nbt_match_path(self._get_nbt(False), self._value_type(value)._tag_argument())
+            assert match
+            return match
+
+        return NbtCondition(True, result)
+
     @InCodeToSyntaxPhase
     def Matches(self, value: Assign[Self] | T):
+        """
+        このNbtに値がマッチするかどうかをチェックする
+        マッチするかどうかはこの関数が実行された時点のもので、後から元データが変更されても影響はない。
+        """
+
         if not isinstance(value, Assign):
             value = self._value_type(value)
 

@@ -5,16 +5,20 @@ from builder.context.server_async import (
     AsyncContinueContextStatement,
     AsyncIfContextStatement,
     AsyncContextStatement,
+    AsyncListenContextStatement,
+    AsyncSleepContextStatement,
 )
 from builder.context.sync import SyncFuncdefContextStatement
 from builder.converter.base import SyntaxParser
 from builder.converter.perser_def import ApplyPerser, RepeatPerser, SymbolParser, UnionPerser
 from builder.converter.sync import SyncSyntaxParser
-from builder.syntax.AsyncFunctionDef import ContinueWith
+from builder.syntax.AsyncFunctionDef import ContinueWithSyntax
 from builder.syntax.Elif import ElifSyntax
 from builder.syntax.Else import ElseSyntax
 from builder.syntax.FunctionDef import McfunctionDef, RecursiveMcfunctionDef
 from builder.syntax.If import IfSyntax
+from builder.syntax.Listen import ListenSyntax
+from builder.syntax.Sleep import SleepSyntax
 
 
 class AsyncSyntaxParser(SyntaxParser[AsyncContextStatement]):
@@ -50,16 +54,43 @@ class AsyncSyntaxParser(SyntaxParser[AsyncContextStatement]):
     @classmethod
     @property
     def continue_parser(cls):
-        return ApplyPerser(SymbolParser(ContinueWith), cls._continue)
+        return ApplyPerser(SymbolParser(ContinueWithSyntax), cls._continue)
 
     @classmethod
-    def _continue(cls, arg: ContinueWith) -> ContextStatement:
+    def _continue(cls, arg: ContinueWithSyntax) -> ContextStatement:
         return AsyncContinueContextStatement(arg._continue)
+
+    @classmethod
+    @property
+    def sleep_parser(cls):
+        return ApplyPerser(SymbolParser(SleepSyntax), cls._sleep)
+
+    @classmethod
+    def _sleep(cls, arg: SleepSyntax) -> ContextStatement:
+        return AsyncSleepContextStatement(arg.tick)
+
+    @classmethod
+    @property
+    def listen_parser(cls):
+        return ApplyPerser(SymbolParser(ListenSyntax), cls._listen)
+
+    @classmethod
+    def _listen(cls, arg: ListenSyntax) -> ContextStatement:
+        return AsyncListenContextStatement(arg.fragment)
 
     @classmethod
     @property
     def root_parser(cls):
         return ApplyPerser(
-            RepeatPerser(UnionPerser(cls.expression_parser, cls.if_parser, cls.funcdef_parser, cls.continue_parser)),
+            RepeatPerser(
+                UnionPerser(
+                    cls.expression_parser,
+                    cls.if_parser,
+                    cls.funcdef_parser,
+                    cls.continue_parser,
+                    cls.sleep_parser,
+                    cls.listen_parser,
+                )
+            ),
             cls._root,
         )

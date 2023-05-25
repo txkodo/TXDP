@@ -8,6 +8,8 @@ from minecraft.datapack.function import Function
 
 B = TypeVar("B", bound=Literal[True, False])
 
+fragment_map: dict[ResourceLocation, Fragment] = {}
+
 
 class Fragment(Generic[B]):
     _fragments: ClassVar[list[Fragment]] = []
@@ -24,7 +26,7 @@ class Fragment(Generic[B]):
         return str(self._commands)
 
     @overload
-    def __new__(cls, location: ResourceLocation) -> Fragment[Literal[True]]:
+    def __new__(cls, location: ResourceLocation | str) -> Fragment[Literal[True]]:
         pass
 
     @overload
@@ -35,17 +37,30 @@ class Fragment(Generic[B]):
     def __new__(cls, location: Literal[False] = False) -> Fragment[Literal[False]]:
         pass
 
-    def __new__(cls, location: ResourceLocation | bool = False) -> Fragment:
-        self = super().__new__(cls)
-        Fragment._fragments.append(self)
-
+    def __new__(cls, location: ResourceLocation | str | bool = False) -> Fragment:
         match location:
             case bool():
-                self._location = None
-                self._must_export = location
+                _location = None
+                _must_export = location
+            case str():
+                _location = ResourceLocation(location)
+                _must_export = True
             case _:
-                self._location = location
-                self._must_export = True
+                _location = location
+                _must_export = True
+
+        if _location in fragment_map:
+            return fragment_map[_location]
+        
+
+        self = super().__new__(cls)
+        self._location = _location
+        self._must_export = _must_export
+
+        if _location is not None:
+            fragment_map[_location] = self
+
+        Fragment._fragments.append(self)
 
         self._need_export = self._must_export
         self._commands = []
@@ -55,6 +70,9 @@ class Fragment(Generic[B]):
     def export(self):
         if self._need_export:
             return Function(self.get_location(), self._commands)
+            # l = self.get_location()
+            # log = LiteralCommand(f"say {l}")
+            # return Function(l, [*self._commands,log])
         return None
 
     def get_location(self):
@@ -74,7 +92,7 @@ class Fragment(Generic[B]):
         if hasattr(self, "_call_command"):
             return self._call_command
 
-        if not self._must_export and self._location is None:
+        if (not self._must_export) and self._location is None:
             if len(self._commands) == 0:
                 self._lock = True
                 self._call_command = None
@@ -89,14 +107,6 @@ class Fragment(Generic[B]):
         self._call_command = command
 
         return command
-
-    def embed(self, fragment: Fragment):
-        if self._must_export:
-            _self: Fragment = self
-            command = _self.call_command()
-            if command is not None:
-                fragment.append(command)
-        fragment.append(*self._commands)
 
     def append(self, *command: Command):
         if self._lock:

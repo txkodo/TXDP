@@ -12,7 +12,7 @@ def before_convert():
         func()
 
 
-class Event:
+class ExportEvent:
     funcs: list[Callable[[], None]]
 
     def __init__(self) -> None:
@@ -25,6 +25,6 @@ class Event:
         for func in self.funcs:
             func()
 
-OnConstructSyntax = Event()
+OnConstructSyntax = ExportEvent()
 
-AfterConstructSyntax = Event()
+AfterConstructSyntax = ExportEvent()
