@@ -1,8 +1,9 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from builder.command.execute_builder import Execute
+from builder.context.environment import BreakableContextEnvironment
 from builder.context.scopes import SyncContextScope
-from builder.base.context import ContextStatement
+from builder.base.context import ContextEnvironment, ContextStatement
 from builder.base.fragment import Fragment
 from builder.context.general import (
     BlockContextStatement,
@@ -26,10 +27,9 @@ class SyncIfContextStatement(ContextStatement):
     _condition: NbtCondition
     _if: SyncContextStatement
 
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
-        self.scope = context.scope
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
         if_fragment = Fragment()
-        self._if._evalate(if_fragment, self)
+        self._if._evalate(if_fragment, context)
         if_call = if_fragment.call_command()
         if if_call:
             fragment.append(ExecuteCommand([self._condition.sub_command()], if_call))
@@ -38,20 +38,19 @@ class SyncIfContextStatement(ContextStatement):
 
 @dataclass
 class SyncConditionContextStatement(ConditionContextStatement[SyncContextStatement]):
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
-        self.scope = context.scope
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
         for before in self._before:
-            fragment = before._evalate(fragment, self)
+            fragment = before._evalate(fragment, context)
 
         if_fragment = Fragment()
-        if_return = self._if._evalate(if_fragment, self)
+        if_return = self._if._evalate(if_fragment, context)
         assert if_fragment is if_return
         if_call = if_fragment.call_command()
         if if_call:
             fragment.append(ExecuteCommand([self._condition.sub_command()], if_call))
 
         else_fragment = Fragment()
-        else_return = self._else._evalate(else_fragment, self)
+        else_return = self._else._evalate(else_fragment, context)
         assert else_fragment is else_return
         else_call = else_fragment.call_command()
         if else_call:
@@ -62,20 +61,19 @@ class SyncConditionContextStatement(ConditionContextStatement[SyncContextStateme
 
 @dataclass
 class SyncBreakableConditionContextStatement(ConditionContextStatement[SyncContextStatement]):
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
-        self.scope = context.scope
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
         for before in self._before:
-            fragment = before._evalate(fragment, self)
+            fragment = before._evalate(fragment, context)
 
         if_fragment = Fragment()
-        if_return = self._if._evalate(if_fragment, self)
+        if_return = self._if._evalate(if_fragment, context)
         assert if_fragment is if_return
         if_call = if_fragment.call_command()
         if if_call:
             fragment.append(ExecuteCommand([self._condition.sub_command()], if_call))
 
         else_fragment = Fragment()
-        else_return = self._else._evalate(else_fragment, self)
+        else_return = self._else._evalate(else_fragment, context)
         assert else_fragment is else_return
         else_call = else_fragment.call_command()
         if else_call:
@@ -99,10 +97,11 @@ BREAK = 2
 
 @dataclass
 class SyncWhileContextStatement(WhileContextStatement[SyncBreakableBlockContextStatement]):
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
-        self.scope = context.scope
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
         # break/continueのチェックのための変数
-        state = Byte(self.scope._allocate())
+        state = Byte(context.scope._allocate())
+
+        env = BreakableContextEnvironment(context.scope, state)
 
         root = Fragment(True)
         main = Fragment(True)
@@ -112,7 +111,7 @@ class SyncWhileContextStatement(WhileContextStatement[SyncBreakableBlockContextS
         # 条件をチェックしてrootを呼び出す
         _root = root
         for before in self._before:
-            _root = before._evalate(root, self)
+            _root = before._evalate(root, env)
         assert _root is root
 
         root.append(state.set_command(DEFAULT)())
@@ -122,7 +121,7 @@ class SyncWhileContextStatement(WhileContextStatement[SyncBreakableBlockContextS
 
         root.append(main.call_command())
 
-        _main = self._block._evalate(main, self)
+        _main = self._block._evalate(main, env)
         assert _main is main
 
         # breakのフラグが立っていたら実行終了
@@ -136,10 +135,10 @@ class SyncWhileContextStatement(WhileContextStatement[SyncBreakableBlockContextS
 
 @dataclass
 class SyncDoWhileContextStatement(WhileContextStatement[SyncBreakableBlockContextStatement]):
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
-        self.scope = context.scope
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
+        state = Byte(context.scope._allocate())
         if_fragment = Fragment()
-        self._block._evalate(if_fragment, self)
+        self._block._evalate(if_fragment, BreakableContextEnvironment(context.scope, state))
         if_call = if_fragment.call_command()
         if if_call:
             fragment.append(ExecuteCommand([self._condition.sub_command()], if_call))
@@ -148,8 +147,10 @@ class SyncDoWhileContextStatement(WhileContextStatement[SyncBreakableBlockContex
 
 @dataclass
 class SyncBreakContextStatement(BreakContextStatement):
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
-        print("BREAK!!!!!")
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
+        assert isinstance(context, BreakableContextEnvironment)
+        fragment.append(context.state.set_command(BREAK)())
+
         return fragment
 
 
@@ -159,7 +160,6 @@ class SyncFuncdefContextStatement(ContextStatement):
     _scope: SyncContextScope
     _fragment: Fragment
 
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
-        self.scope = self._scope
-        self._funcdef._evalate(self._fragment, self)
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
+        self._funcdef._evalate(self._fragment, ContextEnvironment(self._scope))
         return fragment

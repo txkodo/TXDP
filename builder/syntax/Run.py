@@ -1,5 +1,5 @@
 from typing import Callable
-from builder.base.context import ContextStatement
+from builder.base.context import ContextEnvironment
 from builder.base.fragment import Fragment
 from builder.base.syntax import SyntaxExecution, SyntaxStack
 from minecraft.command.base import Command
@@ -17,7 +17,7 @@ class RunSyntax(SyntaxExecution):
     def __init__(self, command: Command | Callable[[], Command]) -> None:
         self.command = command
 
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
         if isinstance(self.command, Command):
             fragment.append(self.command)
         else:

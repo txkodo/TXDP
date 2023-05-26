@@ -16,5 +16,5 @@ def ClearScope(scope: ContextScope):
     """スコープを削除"""
 
     @LazyCalc
-    def _(fragment: Fragment, context: ContextStatement):
+    def _(fragment: Fragment, context: ContextEnvironment):
         fragment.append(*scope._clear())

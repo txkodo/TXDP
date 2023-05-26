@@ -1,5 +1,6 @@
 from __future__ import annotations
 from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass
 from typing import ClassVar
 from builder.base.fragment import Fragment
 from minecraft.command.argument.nbt import NbtArgument, StorageNbtArgument
@@ -41,9 +42,12 @@ class ContextScope:
             f.append(*s._clear_all())
 
 
-class ContextStatement(metaclass=ABCMeta):
+@dataclass
+class ContextEnvironment:
     scope: ContextScope
 
+
+class ContextStatement(metaclass=ABCMeta):
     @abstractmethod
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
         pass

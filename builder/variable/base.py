@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from typing import Callable, Generic, Self, TypeVar, overload
-from builder.base.context import ContextStatement
+from builder.base.context import ContextEnvironment, ContextStatement
 from builder.base.fragment import Fragment
 from builder.base.variable import V, Assign, AssignOneline, Variable
 from builder.export.phase import InCodeToSyntaxPhase
@@ -27,7 +27,7 @@ class BaseValue(Assign[V], AssignOneline[V], Generic[V, T]):
     def _tag_argument(self) -> NbtTagArgument:
         pass
 
-    def _assign(self, target: NbtArgument, fragment: Fragment, context: ContextStatement):
+    def _assign(self, target: NbtArgument, fragment: Fragment, context: ContextEnvironment):
         fragment.append(self._assign_command(target))
 
     def _assign_command(self, target: NbtArgument):
@@ -86,7 +86,7 @@ class BaseVariable(Variable, AssignOneline, Generic[T, B]):
             value = self._value_type(value)
 
         @LazyCalc
-        def _(fragment: Fragment, context: ContextStatement):
+        def _(fragment: Fragment, context: ContextEnvironment):
             value._assign(self.nbt, fragment, context)
 
     def set_command(self, value: AssignOneline[Self] | T) -> Callable[[], Command]:
@@ -97,7 +97,7 @@ class BaseVariable(Variable, AssignOneline, Generic[T, B]):
     @InCodeToSyntaxPhase
     def Exists(self):
         @LazyCalc
-        def result(fragment: Fragment, context: ContextStatement) -> NbtArgument:
+        def result(fragment: Fragment, context: ContextEnvironment) -> NbtArgument:
             result = context.scope._allocate()
             cmd = data_set(result, self.nbt)
             fragment.append(cmd)
@@ -155,7 +155,7 @@ class BaseVariable(Variable, AssignOneline, Generic[T, B]):
 
     def _MatchesVar(self, value: Assign[Self]):
         @LazyCalc
-        def result(fragment: Fragment, context: ContextStatement) -> NbtArgument:
+        def result(fragment: Fragment, context: ContextEnvironment) -> NbtArgument:
             tmp = context.scope._allocate()
             result = context.scope._allocate()
             value._assign(tmp, fragment, context)
@@ -168,7 +168,7 @@ class BaseVariable(Variable, AssignOneline, Generic[T, B]):
 
     def _MatchesVal(self, value: BaseValue):
         @LazyCalc
-        def result(fragment: Fragment, context: ContextStatement) -> NbtArgument:
+        def result(fragment: Fragment, context: ContextEnvironment) -> NbtArgument:
             tmp = context.scope._allocate()
             fragment.append(data_set(tmp, self.nbt))
             match = nbt_match_path(tmp, value._tag_argument())

@@ -42,7 +42,7 @@ class ScaledInt(Assign[Int], AssignOneline[Int]):
         self._value = value
         self._scale = scale
 
-    def _assign(self, target: NbtArgument, fragment: Fragment, context: ContextStatement):
+    def _assign(self, target: NbtArgument, fragment: Fragment, context: ContextEnvironment):
         fragment.append(self._assign_command(target))
 
     def _assign_command(self, target: NbtArgument):

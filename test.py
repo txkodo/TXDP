@@ -12,7 +12,9 @@ Run("say start")
 with Mc.While(a.matches(0).Not()):
     Run("say hello")
     a.Set(a.scale(0.99))
-    Mc.Break
+
+    with Mc.If(a.matches(5)):
+        Mc.Break
 
 Run("say end")
 export(DATAPACK_PATH, "txc")

@@ -24,6 +24,6 @@ class OnInitExec(SyntaxExecution):
     def __init__(self, effect: Callable[[Fragment, ContextStatement], None]) -> None:
         self.effect = effect
 
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
         self.effect(fragment, context)
         return fragment

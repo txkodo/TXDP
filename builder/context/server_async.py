@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from builder.base.context import ContextScope, ContextStatement
+from builder.base.context import ContextEnvironment, ContextStatement
 from builder.base.fragment import Fragment
 from builder.command.execute_builder import Execute
 from builder.context.general import BlockContextStatement, ConditionContextStatement
@@ -15,8 +15,7 @@ class AsyncContextStatement(BlockContextStatement):
 
 @dataclass
 class AsyncConditionContextStatement(ConditionContextStatement[AsyncContextStatement]):
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
-        self.scope = context.scope
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
         for before in self._before:
             fragment = before._evalate(fragment, context)
 
@@ -48,9 +47,8 @@ class AsyncFuncdefContextStatement(ContextStatement):
     _scope: AsyncContextScope
     _fragment: Fragment
 
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
-        self.scope = self._scope
-        self._funcdef._evalate(self._fragment, self)
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
+        self._funcdef._evalate(self._fragment, ContextEnvironment(self._scope))
         return fragment
 
 
@@ -58,8 +56,7 @@ class AsyncFuncdefContextStatement(ContextStatement):
 class AsyncContinueContextStatement(ContextStatement):
     _fragment: Fragment
 
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
-        self.scope = context.scope
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
         return self._fragment
 
 
@@ -67,8 +64,7 @@ class AsyncContinueContextStatement(ContextStatement):
 class AsyncSleepContextStatement(ContextStatement):
     _tick: int
 
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
-        self.scope = context.scope
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
         _continue = Fragment(True)
         fragment.append(ScheduleCommand(_continue.get_location(), self._tick))
         return _continue
@@ -78,8 +74,7 @@ class AsyncSleepContextStatement(ContextStatement):
 class AsyncListenContextStatement(ContextStatement):
     _fragment: Fragment
 
-    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
-        self.scope = context.scope
+    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
         nbt = Byte(allocator=context.scope._allocate)
         fragment.append(nbt.set_command(1)())
 
