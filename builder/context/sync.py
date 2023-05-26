@@ -9,6 +9,7 @@ from builder.context.general import (
     BlockContextStatement,
     BreakContextStatement,
     ConditionContextStatement,
+    ContinueContextStatement,
     WhileContextStatement,
 )
 from builder.variable.Byte import Byte
@@ -61,7 +62,7 @@ class SyncConditionContextStatement(ConditionContextStatement[SyncContextStateme
 
 @dataclass
 class SyncBreakableConditionContextStatement(ConditionContextStatement[SyncContextStatement]):
-    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
+    def _evalate(self, fragment: Fragment, context: BreakableContextEnvironment) -> Fragment:
         for before in self._before:
             fragment = before._evalate(fragment, context)
 
@@ -78,6 +79,10 @@ class SyncBreakableConditionContextStatement(ConditionContextStatement[SyncConte
         else_call = else_fragment.call_command()
         if else_call:
             fragment.append(ExecuteCommand([self._condition.Not().sub_command()], else_call))
+
+        break_or_continume = Execute.If(context.state.matches(DEFAULT).Not()).run_command(ReturnCommand(0))()
+
+        fragment.append(break_or_continume)
 
         return fragment
 
@@ -147,9 +152,16 @@ class SyncDoWhileContextStatement(WhileContextStatement[SyncBreakableBlockContex
 
 @dataclass
 class SyncBreakContextStatement(BreakContextStatement):
-    def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
-        assert isinstance(context, BreakableContextEnvironment)
+    def _evalate(self, fragment: Fragment, context: BreakableContextEnvironment) -> Fragment:
         fragment.append(context.state.set_command(BREAK)())
+
+        return fragment
+
+
+@dataclass
+class SyncContinueContextStatement(ContinueContextStatement):
+    def _evalate(self, fragment: Fragment, context: BreakableContextEnvironment) -> Fragment:
+        fragment.append(context.state.set_command(CONTINUE)())
 
         return fragment
 

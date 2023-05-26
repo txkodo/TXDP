@@ -5,6 +5,7 @@ from builder.syntax.If import _If, _BeforeIfSyntax
 from builder.syntax.While import _While, _BeforeWhileSyntax
 from builder.syntax.DoWhile import _DoWhile, _BeforeDoWhileSyntax
 from builder.syntax.Break import _BreakSyntax
+from builder.syntax.Continue import _ContinueSyntax
 from builder.variable.condition import NbtCondition
 
 
@@ -52,6 +53,10 @@ class _McMeta(type):
     @property
     def Break(cls):
         SyntaxStack.append(_BreakSyntax())
+
+    @property
+    def Continue(cls):
+        SyntaxStack.append(_ContinueSyntax())
 
 
 class Mc(metaclass=_McMeta):

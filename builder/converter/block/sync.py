@@ -6,6 +6,7 @@ from builder.context.sync import (
     SyncBreakableConditionContextStatement,
     SyncConditionContextStatement,
     SyncContextStatement,
+    SyncContinueContextStatement,
     SyncDoWhileContextStatement,
     SyncFuncdefContextStatement,
     SyncWhileContextStatement,
@@ -25,7 +26,9 @@ from builder.syntax.FunctionDef import McfunctionDef, RecursiveMcfunctionDef
 syncBlockPerser = BlockPerser(SyncContextStatement)
 
 # break/continueのある同期ブロック
-syncBreakableBlockPerser = BreakableBlockPerser(SyncBreakableBlockContextStatement, SyncBreakContextStatement)
+syncBreakableBlockPerser = BreakableBlockPerser(
+    SyncBreakableBlockContextStatement, SyncBreakContextStatement, SyncContinueContextStatement
+)
 
 syncExecutionParser = SymbolParser(SyntaxExecution)
 

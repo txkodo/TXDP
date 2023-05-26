@@ -1,7 +1,7 @@
 from typing import TypeVar
 
 from builder.base.context import ContextStatement
-from builder.context.general import BlockContextStatement, BreakContextStatement
+from builder.context.general import BlockContextStatement, BreakContextStatement, ContinueContextStatement
 from builder.converter.perser_def import (
     ApplyPerser,
     ConcatPerser,
@@ -13,6 +13,7 @@ from builder.converter.perser_def import (
     UnionPerser,
 )
 from builder.syntax.Break import _BreakSyntax
+from builder.syntax.Continue import _ContinueSyntax
 
 
 T = TypeVar("T", bound=BlockContextStatement)
@@ -39,22 +40,34 @@ class BlockPerser(Parser[T]):
 
 
 class BreakableBlockPerser(Parser[T]):
-    def __init__(self, statement_type: type[T], break_type: type[BreakContextStatement]) -> None:
+    def __init__(
+        self,
+        statement_type: type[T],
+        break_type: type[BreakContextStatement],
+        continue_type: type[ContinueContextStatement],
+    ) -> None:
         self.statement_type = statement_type
         self.break_type = break_type
+        self.continue_type = continue_type
         self.__parsers: list[Parser[ContextStatement]] = []
         self.__update()
 
     def __update(self):
         self.__parser = ApplyPerser(
-            ConcatPerser(RepeatPerser(UnionPerser(*self.__parsers)), OptionalPerser(SymbolParser(_BreakSyntax))),
+            ConcatPerser(
+                RepeatPerser(UnionPerser(*self.__parsers)),
+                OptionalPerser(UnionPerser(SymbolParser(_BreakSyntax), SymbolParser(_ContinueSyntax))),
+            ),
             self._apply,
         )
 
-    def _apply(self, arg: tuple[list[ContextStatement], _BreakSyntax | None]):
+    def _apply(self, arg: tuple[list[ContextStatement], _BreakSyntax | _ContinueSyntax | None]):
         _stmt, _break = arg
-        if _break is not None:
-            _stmt.append(self.break_type())
+        match _break:
+            case _BreakSyntax():
+                _stmt.append(self.break_type())
+            case _ContinueSyntax():
+                _stmt.append(self.continue_type())
 
         return self.statement_type(_stmt)
 

@@ -10,11 +10,14 @@ a = Int.New(10)
 
 Run("say start")
 with Mc.While(a.matches(0).Not()):
-    Run("say hello")
+    Run("say =======")
     a.Set(a.scale(0.99))
 
     with Mc.If(a.matches(5)):
-        Mc.Break
+        Run("say 5")
+        Mc.Continue
+
+    Run("say x")
 
 Run("say end")
 export(DATAPACK_PATH, "txc")
