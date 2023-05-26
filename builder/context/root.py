@@ -1,13 +1,7 @@
-from dataclasses import dataclass
-from builder.base.context import ContextScope, ContextStatement
-from builder.base.fragment import Fragment
-from builder.context.general import BlockContextStatement
-from builder.variable.condition import NbtCondition
+from builder.base.context import ContextScope
 from builder.declare.id_generator import nbtId
-from minecraft.command.argument.nbt import NbtArgument, StorageNbtArgument
-from minecraft.command.argument.resource_location import ResourceLocation
+from minecraft.command.argument.nbt import NbtArgument
 from minecraft.command.command.data import DataRemoveCommand
-from minecraft.command.command.execute import ExecuteCommand
 
 
 class RootContextScope(ContextScope):

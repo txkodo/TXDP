@@ -4,6 +4,7 @@ from builder.syntax.Else import _Else
 from builder.syntax.If import _If, _BeforeIfSyntax
 from builder.syntax.While import _While, _BeforeWhileSyntax
 from builder.syntax.DoWhile import _DoWhile, _BeforeDoWhileSyntax
+from builder.syntax.Break import _BreakSyntax
 from builder.variable.condition import NbtCondition
 
 
@@ -47,6 +48,10 @@ class _McMeta(type):
             return _DoWhile(condition)
 
         return inner
+
+    @property
+    def Break(cls):
+        SyntaxStack.append(_BreakSyntax())
 
 
 class Mc(metaclass=_McMeta):

@@ -3,7 +3,7 @@ from typing import Any, Generic, TypeVar, overload
 from builder.base.condition import Condition
 from builder.base.fragment import Fragment
 from builder.command.execute_builder import Execute
-from builder.syntax.Continue import ContinueWith
+from builder.syntax.ContinueWith import ContinueWith
 from builder.syntax.Fragment import WithFragment
 from builder.syntax.Run import Run
 from builder.syntax.general import LazyCommand

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Callable, Generic, Iterable, TypeVar
-from builder.base.context import ContextScope
+from builder.base.context import ContextStatement
 from builder.base.fragment import Fragment
 from builder.base.syntax import SyntaxExecution, SyntaxStack
 from minecraft.command.base import Command
@@ -10,12 +10,12 @@ T = TypeVar("T")
 
 # 値を計算するためにコマンドを実行する必要がある場合
 class LazyCalc(SyntaxExecution, Generic[T]):
-    def __init__(self, effect: Callable[[Fragment, ContextScope], T]) -> None:
+    def __init__(self, effect: Callable[[Fragment, ContextStatement], T]) -> None:
         SyntaxStack.append(self)
         self.effect = effect
 
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
-        self.result = self.effect(fragment, scope)
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
+        self.result = self.effect(fragment, context)
         return fragment
 
     def __call__(self) -> T:
@@ -28,7 +28,7 @@ class LazyFreeCalc(SyntaxExecution, Generic[T]):
         SyntaxStack.append(self)
         self.effect = effect
 
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
         if hasattr(self, "result"):
             self.result
         self.result = self.effect()
@@ -47,7 +47,7 @@ class LazyCommand(SyntaxExecution, Generic[T]):
         SyntaxStack.append(self)
         self.effect = effect
 
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
         fragment.append(self.effect())
         return fragment
 
@@ -58,16 +58,16 @@ class LazyCommands(SyntaxExecution, Generic[T]):
         SyntaxStack.append(self)
         self.effect = effect
 
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
         fragment.append(*self.effect())
         return fragment
 
 
 class LazyAction(SyntaxExecution, Generic[T]):
-    def __init__(self, effect: Callable[[Fragment, ContextScope], None]) -> None:
+    def __init__(self, effect: Callable[[Fragment, ContextStatement], None]) -> None:
         SyntaxStack.append(self)
         self.effect = effect
 
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
-        self.effect(fragment, scope)
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
+        self.effect(fragment, context)
         return fragment

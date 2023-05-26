@@ -42,6 +42,8 @@ class ContextScope:
 
 
 class ContextStatement(metaclass=ABCMeta):
+    scope: ContextScope
+
     @abstractmethod
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
         pass

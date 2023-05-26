@@ -1,5 +1,5 @@
 from typing import Callable
-from builder.base.context import ContextScope
+from builder.base.context import ContextStatement
 from builder.base.fragment import Fragment
 from builder.base.syntax import RootSyntax, SyntaxExecution, SyntaxStack
 
@@ -16,14 +16,14 @@ class _OnInitMeta(type):
 class OnInit(metaclass=_OnInitMeta):
     """init.mcfunction内で実行したい内容を記述"""
 
-    def __init__(self, effect: Callable[[Fragment, ContextScope], None]) -> None:
+    def __init__(self, effect: Callable[[Fragment, ContextStatement], None]) -> None:
         RootSyntax.append(OnInitExec(effect))
 
 
 class OnInitExec(SyntaxExecution):
-    def __init__(self, effect: Callable[[Fragment, ContextScope], None]) -> None:
+    def __init__(self, effect: Callable[[Fragment, ContextStatement], None]) -> None:
         self.effect = effect
 
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
-        self.effect(fragment, scope)
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
+        self.effect(fragment, context)
         return fragment

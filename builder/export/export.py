@@ -60,7 +60,8 @@ def export(
     scope.clear_all_scope(init)
 
     # syntax -> *fragment
-    rootContext._evalate(init, scope)
+    rootContext.scope = scope
+    rootContext._evalate(init, rootContext)
 
     funcs: list[Function] = []
 

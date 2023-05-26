@@ -1,10 +1,7 @@
 from typing import TypeVar
-from builder.base.context import ContextScope
 from builder.context.scopes import BaseContextScope
-from builder.base.variable import Variable
 from builder.declare.id_generator import nbtId
 from builder.variable.base import BaseVariable
-from minecraft.command.argument.nbt import NbtArgument
 
 
 def entangle(*arg: tuple[type[BaseVariable], BaseContextScope]) -> list[BaseVariable]:

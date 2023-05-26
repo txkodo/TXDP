@@ -1,11 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable, Generic, Self, TypeVar
-from builder.base.context import ContextScope, ContextStatement
-from builder.base.fragment import Fragment
-from builder.export.phase import InCodeToSyntaxPhase
+from builder.base.context import ContextStatement
 
-from minecraft.command.base import Command
 
 
 class SyntaxStack:

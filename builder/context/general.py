@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Generic, TypeVar
-from builder.base.context import ContextScope, ContextStatement
+from builder.base.context import ContextStatement
 from builder.base.fragment import Fragment
 from builder.variable.condition import NbtCondition
 
@@ -9,9 +9,9 @@ from builder.variable.condition import NbtCondition
 class BlockContextStatement(ContextStatement):
     _statements: list[ContextStatement]
 
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
         for statement in self._statements:
-            fragment = statement._evalate(fragment, scope)
+            fragment = statement._evalate(fragment, context)
         return fragment
 
 
@@ -24,3 +24,15 @@ class ConditionContextStatement(ContextStatement, Generic[T]):
     _condition: NbtCondition
     _if: T
     _else: T
+
+
+@dataclass
+class WhileContextStatement(ContextStatement, Generic[T]):
+    _before: list[ContextStatement]
+    _condition: NbtCondition
+    _block: T
+
+
+@dataclass
+class BreakContextStatement(ContextStatement, Generic[T]):
+    pass

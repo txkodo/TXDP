@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-from builder.base.context import ContextScope
+from builder.base.context import ContextStatement
 from builder.base.fragment import Fragment
 from builder.base.syntax import SyntaxBlock, SyntaxExecution, SyntaxStack
 from builder.context.scopes import nullContextScope
 
 
 class WithFragment(SyntaxBlock):
-    def __init__(self,fragment:Fragment):
+    def __init__(self, fragment: Fragment):
         self.syntax = WithFragmentSyntax(fragment)
         SyntaxStack.append(self.syntax)
 
@@ -21,10 +21,11 @@ class WithFragment(SyntaxBlock):
 class WithFragmentSyntax(SyntaxBlock, SyntaxExecution):
     _fragment: Fragment
 
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
+        self.scope = nullContextScope
         for statement in self._statements:
             assert isinstance(statement, SyntaxExecution)
-            f = statement._evalate(self._fragment, nullContextScope)
+            f = statement._evalate(self._fragment, self)
             assert f is self._fragment
 
         return fragment

@@ -15,7 +15,7 @@ from builder.converter.perser_def import (
     UnionPerser,
 )
 from builder.syntax.AsyncFunctionDef import AsyncMcfunctionDef
-from builder.syntax.Continue import ContinueWithSyntax
+from builder.syntax.ContinueWith import ContinueWithSyntax
 
 asyncBlockPerser = BlockPerser(AsyncContextStatement)
 

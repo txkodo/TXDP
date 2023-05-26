@@ -5,7 +5,6 @@ from builder.command.execute_builder import Execute
 from builder.context.general import BlockContextStatement, ConditionContextStatement
 from builder.context.scopes import AsyncContextScope
 from builder.variable.Byte import Byte
-from builder.variable.condition import NbtCondition
 from minecraft.command.command.schedule import ScheduleCommand
 
 
@@ -16,25 +15,26 @@ class AsyncContextStatement(BlockContextStatement):
 
 @dataclass
 class AsyncConditionContextStatement(ConditionContextStatement[AsyncContextStatement]):
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
+        self.scope = context.scope
         for before in self._before:
-            fragment = before._evalate(fragment, scope)
+            fragment = before._evalate(fragment, context)
 
         exit = Fragment(True)
 
-        tmp = Byte(allocator=scope._allocate)
+        tmp = Byte(allocator=context.scope._allocate)
         setnbt = Execute.If(self._condition).run_command(tmp.set_command(1))
         fragment.append(setnbt())
 
         else_entry = Fragment()
-        self._else._evalate(else_entry, scope).append(exit.call_command())
+        self._else._evalate(else_entry, context).append(exit.call_command())
 
         else_call = else_entry.call_command()
         if else_call:
             fragment.append(Execute.Unless(tmp.exists()).run_command(else_call)())
 
         if_entry = Fragment()
-        self._if._evalate(if_entry, scope).append(exit.call_command())
+        self._if._evalate(if_entry, context).append(exit.call_command())
 
         if_call = if_entry.call_command()
         if if_call:
@@ -48,8 +48,9 @@ class AsyncFuncdefContextStatement(ContextStatement):
     _scope: AsyncContextScope
     _fragment: Fragment
 
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
-        self._funcdef._evalate(self._fragment, self._scope)
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
+        self.scope = self._scope
+        self._funcdef._evalate(self._fragment, self)
         return fragment
 
 
@@ -57,7 +58,8 @@ class AsyncFuncdefContextStatement(ContextStatement):
 class AsyncContinueContextStatement(ContextStatement):
     _fragment: Fragment
 
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
+        self.scope = context.scope
         return self._fragment
 
 
@@ -65,7 +67,8 @@ class AsyncContinueContextStatement(ContextStatement):
 class AsyncSleepContextStatement(ContextStatement):
     _tick: int
 
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
+        self.scope = context.scope
         _continue = Fragment(True)
         fragment.append(ScheduleCommand(_continue.get_location(), self._tick))
         return _continue
@@ -75,8 +78,9 @@ class AsyncSleepContextStatement(ContextStatement):
 class AsyncListenContextStatement(ContextStatement):
     _fragment: Fragment
 
-    def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
-        nbt = Byte(allocator=scope._allocate)
+    def _evalate(self, fragment: Fragment, context: ContextStatement) -> Fragment:
+        self.scope = context.scope
+        nbt = Byte(allocator=context.scope._allocate)
         fragment.append(nbt.set_command(1)())
 
         _cont = Fragment(True)

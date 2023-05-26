@@ -1,6 +1,6 @@
 from abc import abstractmethod
-from typing import Callable, Generic, Literal, Self, TypeVar, overload
-from builder.base.context import ContextScope
+from typing import Callable, Generic, Self, TypeVar, overload
+from builder.base.context import ContextStatement
 from builder.base.fragment import Fragment
 from builder.base.variable import V, Assign, AssignOneline, Variable
 from builder.export.phase import InCodeToSyntaxPhase
@@ -8,10 +8,8 @@ from builder.syntax.general import LazyCalc, LazyCommand, LazyFreeCalc
 from builder.util.command import data_set, store_success_byte
 from builder.util.nbt import nbt_match_path
 from builder.variable.condition import NbtCondition
-from builder.variable.store import StoreTarget
 from minecraft.command.argument.nbt import NbtArgument
 from minecraft.command.argument.nbt_tag import NbtByteTagArgument, NbtTagArgument
-from minecraft.command.argument.storeable import NbtStoreableArgument, StoreableArgument
 from minecraft.command.base import Command
 from minecraft.command.command.data import DataModifyValueSource, DataRemoveCommand, DataSetCommand
 
@@ -29,7 +27,7 @@ class BaseValue(Assign[V], AssignOneline[V], Generic[V, T]):
     def _tag_argument(self) -> NbtTagArgument:
         pass
 
-    def _assign(self, target: NbtArgument, fragment: Fragment, scope: ContextScope):
+    def _assign(self, target: NbtArgument, fragment: Fragment, context: ContextStatement):
         fragment.append(self._assign_command(target))
 
     def _assign_command(self, target: NbtArgument):
@@ -88,8 +86,8 @@ class BaseVariable(Variable, AssignOneline, Generic[T, B]):
             value = self._value_type(value)
 
         @LazyCalc
-        def _(fragment: Fragment, scope: ContextScope):
-            value._assign(self.nbt, fragment, scope)
+        def _(fragment: Fragment, context: ContextStatement):
+            value._assign(self.nbt, fragment, context)
 
     def set_command(self, value: AssignOneline[Self] | T) -> Callable[[], Command]:
         if not isinstance(value, AssignOneline):
@@ -99,8 +97,8 @@ class BaseVariable(Variable, AssignOneline, Generic[T, B]):
     @InCodeToSyntaxPhase
     def Exists(self):
         @LazyCalc
-        def result(fragment: Fragment, scope: ContextScope) -> NbtArgument:
-            result = scope._allocate()
+        def result(fragment: Fragment, context: ContextStatement) -> NbtArgument:
+            result = context.scope._allocate()
             cmd = data_set(result, self.nbt)
             fragment.append(cmd)
             return result
@@ -157,10 +155,10 @@ class BaseVariable(Variable, AssignOneline, Generic[T, B]):
 
     def _MatchesVar(self, value: Assign[Self]):
         @LazyCalc
-        def result(fragment: Fragment, scope: ContextScope) -> NbtArgument:
-            tmp = scope._allocate()
-            result = scope._allocate()
-            value._assign(tmp, fragment, scope)
+        def result(fragment: Fragment, context: ContextStatement) -> NbtArgument:
+            tmp = context.scope._allocate()
+            result = context.scope._allocate()
+            value._assign(tmp, fragment, context)
             fragment.append(store_success_byte(result, data_set(tmp, self.nbt)))
             match = nbt_match_path(result, NbtByteTagArgument(0))
             assert match
@@ -170,8 +168,8 @@ class BaseVariable(Variable, AssignOneline, Generic[T, B]):
 
     def _MatchesVal(self, value: BaseValue):
         @LazyCalc
-        def result(fragment: Fragment, scope: ContextScope) -> NbtArgument:
-            tmp = scope._allocate()
+        def result(fragment: Fragment, context: ContextStatement) -> NbtArgument:
+            tmp = context.scope._allocate()
             fragment.append(data_set(tmp, self.nbt))
             match = nbt_match_path(tmp, value._tag_argument())
             assert match

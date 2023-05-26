@@ -1,9 +1,8 @@
 from __future__ import annotations
 from math import floor, log
-from builder.base.context import ContextScope
 from builder.base.fragment import Fragment
 from builder.command.execute_builder import Execute
-from builder.syntax.general import LazyAction, LazyCommand
+from builder.syntax.general import LazyAction, LazyCommand, LazyFreeCalc
 from builder.util.id import intId
 from builder.variable.Byte import Byte
 from builder.variable.Compound import Compound, CompoundValue
@@ -23,8 +22,8 @@ class BineryTree:
         self.__frozen = False
         self.__nbt = compound
 
-        @LazyAction
-        def _(_: Fragment, __: ContextScope):
+        @LazyFreeCalc
+        def _():
             self._freeze()
             flag = self.__nbt.child(Byte, "+")
             flag_on = flag.set_command(1)
