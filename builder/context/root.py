@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from builder.base.context import ContextScope, ContextStatement
 from builder.base.fragment import Fragment
-from builder.context.general import BLockContextStatement
+from builder.context.general import BlockContextStatement
 from builder.variable.condition import NbtCondition
 from builder.declare.id_generator import nbtId
 from minecraft.command.argument.nbt import NbtArgument, StorageNbtArgument

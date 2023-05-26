@@ -1,7 +1,7 @@
 from builder.base.syntax import SyntaxStack
 from builder.syntax.Elif import _BeforeElifSyntax, _Elif
 from builder.syntax.Else import _Else
-from builder.syntax.If import _If
+from builder.syntax.If import _If, _BeforeIfSyntax
 from builder.syntax.While import _While, _BeforeWhileSyntax
 from builder.syntax.DoWhile import _DoWhile, _BeforeDoWhileSyntax
 from builder.variable.condition import NbtCondition
@@ -10,6 +10,8 @@ from builder.variable.condition import NbtCondition
 class _McMeta(type):
     @property
     def If(cls):
+        SyntaxStack.append(_BeforeIfSyntax())
+
         def inner(condition: NbtCondition):
             return _If(condition)
 

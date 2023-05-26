@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from builder.base.context import ContextScope, ContextStatement
 from builder.base.fragment import Fragment
 from builder.command.execute_builder import Execute
-from builder.context.general import BLockContextStatement
+from builder.context.general import BlockContextStatement, ConditionContextStatement
 from builder.context.scopes import AsyncContextScope
 from builder.variable.Byte import Byte
 from builder.variable.condition import NbtCondition
@@ -10,17 +10,16 @@ from minecraft.command.command.schedule import ScheduleCommand
 
 
 @dataclass
-class AsyncContextStatement(BLockContextStatement):
+class AsyncContextStatement(BlockContextStatement):
     pass
 
 
 @dataclass
-class AsyncConditionContextStatement(ContextStatement):
-    _condition: NbtCondition
-    _if: AsyncContextStatement
-    _else: AsyncContextStatement
-
+class AsyncConditionContextStatement(ConditionContextStatement[AsyncContextStatement]):
     def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+        for before in self._before:
+            fragment = before._evalate(fragment, scope)
+
         exit = Fragment(True)
 
         tmp = Byte(allocator=scope._allocate)

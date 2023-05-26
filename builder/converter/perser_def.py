@@ -1,10 +1,10 @@
 from __future__ import annotations
-from typing import Callable, Generic, TypeAlias, TypeVar, overload
+from typing import Callable, Generic, Iterable, TypeAlias, TypeVar, overload
 from builder.base.syntax import SyntaxExecution, SyntaxStatement
 
 Input: TypeAlias = list[SyntaxStatement | SyntaxExecution]
 
-T = TypeVar("T")
+T = TypeVar("T", covariant=True)
 
 
 class Parsee:
@@ -37,7 +37,7 @@ class Parser(Generic[T]):
         input, value = result
         if input.has_next():
             input, value = input.next()
-            raise ParserException(f"パースが最後まで到達しませんでした。{type(value).__name__}はこの文脈で使用出来ません。")
+            raise ParserException(f"パースが最後まで到達しませんでした。{type(value).__name__}はこの文脈で使用出来ないか内部に構文エラーがあります。")
         return value
 
 
@@ -58,12 +58,15 @@ class EndParser(Parser[None]):
             return input, None
 
 
-class RepeatPerser(Parser[list[T]]):
-    def __init__(self, parser: Parser[T]) -> None:
+U = TypeVar("U")
+
+
+class RepeatPerser(Parser[list[U]]):
+    def __init__(self, parser: Parser[U]) -> None:
         self.parser = parser
 
-    def parse(self, input: Parsee) -> tuple[Parsee, list[T]]:
-        result: list[T] = []
+    def parse(self, input: Parsee) -> tuple[Parsee, list[U]]:
+        result: list[U] = []
         content = self.parser.parse(input)
         while content:
             input, value = content
@@ -72,11 +75,11 @@ class RepeatPerser(Parser[list[T]]):
         return input, result
 
 
-class OptionalPerser(Parser[T | None]):
-    def __init__(self, parser: Parser[T]) -> None:
+class OptionalPerser(Parser[U | None]):
+    def __init__(self, parser: Parser[U]) -> None:
         self.parser = parser
 
-    def parse(self, input: Parsee) -> tuple[Parsee, T | None]:
+    def parse(self, input: Parsee) -> tuple[Parsee, U | None]:
         content = self.parser.parse(input)
         if content is None:
             return input, None
@@ -95,6 +98,10 @@ H = TypeVar("H")
 
 
 class UnionPerser(Parser[T]):
+    @overload
+    def __init__(self: UnionPerser) -> None:
+        pass
+
     @overload
     def __init__(self: UnionPerser[A], a: Parser[A]) -> None:
         pass

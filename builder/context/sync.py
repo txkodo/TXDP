@@ -3,13 +3,13 @@ from dataclasses import dataclass
 from builder.context.scopes import SyncContextScope
 from builder.base.context import ContextScope, ContextStatement
 from builder.base.fragment import Fragment
-from builder.context.general import BLockContextStatement
+from builder.context.general import BlockContextStatement, ConditionContextStatement
 from builder.variable.condition import NbtCondition
 from minecraft.command.command.execute import ExecuteCommand
 
 
 @dataclass
-class SyncContextStatement(BLockContextStatement):
+class SyncContextStatement(BlockContextStatement):
     pass
 
 
@@ -28,12 +28,11 @@ class SyncIfContextStatement(ContextStatement):
 
 
 @dataclass
-class SyncConditionContextStatement(ContextStatement):
-    _condition: NbtCondition
-    _if: SyncContextStatement
-    _else: SyncContextStatement
-
+class SyncConditionContextStatement(ConditionContextStatement[SyncContextStatement]):
     def _evalate(self, fragment: Fragment, scope: ContextScope) -> Fragment:
+        for before in self._before:
+            fragment = before._evalate(fragment, scope)
+
         if_fragment = Fragment()
         if_return = self._if._evalate(if_fragment, scope)
         assert if_fragment is if_return

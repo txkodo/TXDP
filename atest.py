@@ -23,7 +23,7 @@ def a0() -> Byte:
 @AsyncMcfunction()
 def a1() -> None:
     Run(f"say HAJIMARI")
-    with Mc.If(Await(a0()).Matches(100)):
+    with Mc.If(Await(a0()).Matches(10)):
         Run("say OK!!")
         Await(Sleep(10))
     with Mc.Else:
