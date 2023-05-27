@@ -13,7 +13,7 @@ def entangle(*arg: tuple[type[BaseVariable], BaseContextScope]) -> list[BaseVari
         if id is None:
             id = nbtId()
 
-    return [var(allocator=lambda: scope._allocate_with_id(get_id())) for var, scope in arg]
+    return [var(lambda: scope._allocate_with_id(get_id())) for var, scope in arg]
 
 
 T = TypeVar("T", bound=BaseVariable)
@@ -21,4 +21,4 @@ T = TypeVar("T", bound=BaseVariable)
 
 def belongs_to(arg: type[T], scope: BaseContextScope) -> T:
     """argがscope直下にくることを保証する"""
-    return arg(allocator=scope._allocate)
+    return arg(scope._allocate)

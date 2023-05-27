@@ -12,8 +12,6 @@ else:
 
 
 class Byte(StoreTarget, BaseVariable[int, ByteValue]):
-    pass
-
     def _store_target(self) -> NbtStoreableArgument:
         return NbtStoreableArgument(self.nbt, "byte", 1)
 

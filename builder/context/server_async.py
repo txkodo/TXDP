@@ -21,7 +21,7 @@ class AsyncConditionContextStatement(ConditionContextStatement[AsyncContextState
 
         exit = Fragment(True)
 
-        tmp = Byte(allocator=context.scope._allocate)
+        tmp = Byte(context.scope._allocate)
         setnbt = Execute.If(self._condition).run_command(tmp.set_command(1))
         fragment.append(setnbt())
 
@@ -75,7 +75,7 @@ class AsyncListenContextStatement(ContextStatement):
     _fragment: Fragment
 
     def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
-        nbt = Byte(allocator=context.scope._allocate)
+        nbt = Byte(context.scope._allocate)
         fragment.append(nbt.set_command(1)())
 
         _cont = Fragment(True)

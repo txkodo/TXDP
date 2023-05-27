@@ -348,7 +348,7 @@ class Mcfunction(Generic[X]):
             result = RecursiveMcfunctionDef(arg_types, return_types, scope, func, entry_point)
         else:
             scope = SyncContextScope()
-            args = [type(allocator=scope._allocate) for type in arg_types]
+            args = [type(scope._allocate) for type in arg_types]
             result = McfunctionDef(args, return_types, scope, func, entry_point)
         SyntaxStack.append(result)
         return result

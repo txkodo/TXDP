@@ -8,7 +8,6 @@ from typing import (
     TypeGuard,
     TypeVar,
     TypeVarTuple,
-    overload,
 )
 from builder.base.fragment import Fragment
 from builder.base.syntax import SyntaxBlock, SyntaxStack
@@ -22,7 +21,6 @@ from builder.util.variable import belongs_to, entangle
 from builder.util.function import denormalize_return_value, normalize_return_value
 from builder.syntax.general import LazyCommand, LazyCommands
 from builder.variable.base import BaseVariable
-from minecraft.command.argument.resource_location import ResourceLocation
 
 P = TypeVarTuple("P")
 R = TypeVar("R", bound=None | BaseVariable | tuple[BaseVariable, ...])

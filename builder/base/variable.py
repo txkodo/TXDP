@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import abstractmethod
-from typing import Callable, Generic, Protocol, Self, TypeVar, runtime_checkable
+from dataclasses import dataclass, field
+from typing import Callable, ClassVar, Generic, Protocol, Self, TypeVar, runtime_checkable
 from builder.base.context import ContextEnvironment
 from builder.base.fragment import Fragment
 from builder.export.phase import InContextToDatapackPhase
@@ -10,39 +11,37 @@ from minecraft.command.argument.nbt import NbtArgument
 from minecraft.command.base import Command
 
 
+@dataclass
 class Variable:
     """
     Nbtを表すクラス
     """
 
-    _assign_type: type[Self]
-    _nbt: NbtArgument | None
-    __allocator: Callable[[], NbtArgument] | None
+    _assign_type: ClassVar[type[Self]]
+    _nbt: NbtArgument | Callable[[], NbtArgument] | None = None
 
     def __init_subclass__(cls) -> None:
         cls._assign_type = cls
         return super().__init_subclass__()
 
-    def __new__(cls, nbt: NbtArgument | None = None, allocator: Callable[[], NbtArgument] | None = None) -> Self:
-        self = super().__new__(cls)
-        self._nbt = nbt
-        self.__allocator = allocator
-
-        if allocator is None:
+    def __post_init__(self):
+        if self._nbt is None:
             # 実行時点のスコープで自動アロケート
             @LazyAction
             def _(_: Fragment, context: ContextEnvironment):
-                self.__allocator = context.scope._allocate
-
-        return self
+                self._nbt = context.scope._allocate
 
     @property
     @InContextToDatapackPhase
     def nbt(self):
-        if self._nbt is None:
-            assert self.__allocator is not None
-            self._nbt = self.__allocator()
-        return self._nbt
+        match self._nbt:
+            case None:
+                raise AssertionError
+            case NbtArgument():
+                return self._nbt
+            case _:
+                self._nbt = self._nbt()
+                return self._nbt
 
     def _assign_command(self, target: NbtArgument):
         return data_set(target, self.nbt)

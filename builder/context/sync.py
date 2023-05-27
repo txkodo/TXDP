@@ -141,12 +141,42 @@ class SyncWhileContextStatement(WhileContextStatement[SyncBreakableBlockContextS
 @dataclass
 class SyncDoWhileContextStatement(WhileContextStatement[SyncBreakableBlockContextStatement]):
     def _evalate(self, fragment: Fragment, context: ContextEnvironment) -> Fragment:
+        # break/continueのチェックのための変数
         state = Byte(context.scope._allocate())
-        if_fragment = Fragment()
-        self._block._evalate(if_fragment, BreakableContextEnvironment(context.scope, state))
-        if_call = if_fragment.call_command()
-        if if_call:
-            fragment.append(ExecuteCommand([self._condition.sub_command()], if_call))
+
+        env = BreakableContextEnvironment(context.scope, state)
+
+        root = Fragment(True)
+        main = Fragment(True)
+
+        # mainの内容を出力
+        _main = self._block._evalate(main, env)
+        assert _main is main
+
+        # fargment >> root
+        fragment.append(root.call_command())
+
+        # state := DEFAULT
+        root.append(state.set_command(DEFAULT)())
+
+        # root >> main
+        root.append(main.call_command())
+
+        # state == BREAK -> return
+        root.append(Execute.If(state.matches(BREAK)).run_command(ReturnCommand(0))())
+
+        # 条件チェック
+        _root = root
+        for before in self._before:
+            _root = before._evalate(root, env)
+        assert _root is root
+        # !condition -> return
+        quit = Execute.Unless(self._condition).run_command(ReturnCommand(0))()
+        root.append(quit)
+
+        # rootを末尾再帰
+        root.append(root.call_command())
+
         return fragment
 
 

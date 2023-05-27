@@ -25,6 +25,10 @@ class ExportEvent:
         for func in self.funcs:
             func()
 
+
+# UnrollFuncdef = ExportEvent()
+# """McFunctiondefの中身を展開するためのイベント"""
+
 OnConstructSyntax = ExportEvent()
 
 AfterConstructSyntax = ExportEvent()

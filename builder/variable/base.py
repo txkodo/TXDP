@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from dataclasses import dataclass
 from typing import Callable, Generic, Self, TypeVar, overload
 from builder.base.context import ContextEnvironment, ContextStatement
 from builder.base.fragment import Fragment
@@ -53,17 +54,16 @@ class BaseVariable(Variable, AssignOneline, Generic[T, B]):
     @overload
     def __new__(
         cls: type[SELF],
-        value: NbtArgument | None = None,
-        allocator: Callable[[], NbtArgument] | None = None,
+        value: NbtArgument | Callable[[], NbtArgument] | None = None,
     ) -> SELF:
         pass
 
-    def __new__(
-        cls: type[SELF], value: NbtArgument | None | T = None, allocator: Callable[[], NbtArgument] | None = None
-    ) -> SELF | B:
+    def __new__(cls: type[SELF], value: NbtArgument | T | Callable[[], NbtArgument] | None = None) -> SELF | B:
         match value:
-            case NbtArgument() | None:
-                return super().__new__(cls, value, allocator)
+            case NbtArgument() | None | Callable():
+                self = super().__new__(cls)
+                self.__init__(value)
+                return self
             case _:
                 return cls._value_type(value)
 

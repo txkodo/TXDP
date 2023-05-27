@@ -12,7 +12,7 @@ from builder.context.sync import (
     SyncWhileContextStatement,
 )
 from builder.converter.block.base import BlockPerser, BreakableBlockPerser
-from builder.converter.block.util import conditionParser, expressionsParser, whileParser
+from builder.converter.block.util import conditionParser, doWhileParser, expressionsParser, whileParser
 from builder.converter.perser_def import (
     ApplyPerser,
     ConcatPerser,
@@ -43,7 +43,7 @@ syncBreakableConditionParser = conditionParser(
 
 syncWhileParser = whileParser(syncExpressionsParser, syncBreakableBlockPerser, SyncWhileContextStatement)
 
-syncDoWhileParser = whileParser(syncExpressionsParser, syncBreakableBlockPerser, SyncDoWhileContextStatement)
+syncDoWhileParser = doWhileParser(syncExpressionsParser, syncBreakableBlockPerser, SyncDoWhileContextStatement)
 
 
 def _funcdef(arg: McfunctionDef | RecursiveMcfunctionDef) -> ContextStatement:

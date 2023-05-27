@@ -14,7 +14,7 @@ class Compound(BaseVariable[dict[str, BaseValue], CompoundValue]):
         def allocator():
             return self.nbt.attr(name)
 
-        return type(allocator=allocator)
+        return type(allocator)
 
 
 class CompoundValue(BaseValue[Compound, dict[str, BaseValue]]):

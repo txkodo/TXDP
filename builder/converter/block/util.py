@@ -109,12 +109,11 @@ def whileParser(expressionsParser: Parser[list[ContextStatement]], blockPerser: 
     )
 
 
-def doWhileParser(expressionsParser: Parser[list[ContextStatement]], blockPerser: Parser[T]):
+def doWhileParser(expressionsParser: Parser[list[ContextStatement]], blockPerser: Parser[T], whileContext: type[W]):
     def aplly(arg: tuple[_BeforeDoWhileSyntax, list[ContextStatement], _DoWhileSyntax]):
         _, exprs, block = arg
-        return exprs, block.condition, blockPerser.parseAll(block._statements)
+        return whileContext(exprs, block.condition, blockPerser.parseAll(block._statements))
 
     return ApplyPerser(
         ConcatPerser(SymbolParser(_BeforeDoWhileSyntax), expressionsParser, SymbolParser(_DoWhileSyntax)), aplly
     )
-
