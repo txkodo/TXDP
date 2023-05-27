@@ -60,12 +60,12 @@ class BaseVariable(Variable, AssignOneline, Generic[T, B]):
 
     def __new__(cls: type[SELF], value: NbtArgument | T | Callable[[], NbtArgument] | None = None) -> SELF | B:
         match value:
-            case NbtArgument() | None | Callable():
+            case int() | float() | str() | list() | dict():
+                return cls._value_type(value)
+            case _:
                 self = super().__new__(cls)
                 self.__init__(value)
                 return self
-            case _:
-                return cls._value_type(value)
 
     @classmethod
     def New(cls, value: Assign[Self] | int):
@@ -137,6 +137,12 @@ class BaseVariable(Variable, AssignOneline, Generic[T, B]):
             return match
 
         return NbtCondition(True, result)
+
+    def __eq__(self, other: Assign[Self] | T):
+        return self.Matches(other)
+
+    def __ne__(self, other: Assign[Self] | T):
+        return self.Matches(other).Not()
 
     @InCodeToSyntaxPhase
     def Matches(self, value: Assign[Self] | T):

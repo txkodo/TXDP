@@ -8,39 +8,36 @@ from builder.syntax.Promise import Await, AwaitAll
 from builder.syntax.Run import Run
 from builder.syntax.Sleep import Sleep
 from builder.variable.Byte import Byte
+from builder.variable.Int import Int
 from path import DATAPACK_PATH
-
-
-event = Event()
-
-
-@AsyncMcfunction()
-def a0() -> Byte:
-    Await(Sleep(10))
-    return Byte.New(100)
 
 
 @AsyncMcfunction()
 def a1() -> None:
-    Run(f"say HAJIMARI")
-    with Mc.If(Await(a0()).Matches(10)):
-        Run("say OK!!")
-        Await(Sleep(10))
-    with Mc.Else:
-        Run("say NG!!")
-        Await(Sleep(10))
-    Run(f"say OWARI")
+    a = Int.New(10)
+
+    Run("say start")
+    with Mc.While(a != 0):
+        a.Set(a * 0.99)
+
+        b = Int.New(3)
+
+        with Mc.While(b != 0):
+            Run("say ...")
+            b.Set(b * 0.99)
+            Await(Sleep(1))
+
+        with Mc.If(a.matches(5)):
+            Run("say 5")
+            Mc.Break
+
+        Run("say x")
+        Await(Sleep(1))
+
+    Run("say end")
 
 
-@Mcfunction("start")
-def start() -> None:
-    a1()
-
-
-@Mcfunction("invoke")
-def invoke() -> None:
-    event.Invoke()
-
+a1()
 
 if __name__ == "__main__":
     export(DATAPACK_PATH, "txc")

@@ -37,6 +37,7 @@ class WhileContextStatement(ContextStatement, Generic[T]):
 class BreakContextStatement(ContextStatement, Generic[T]):
     pass
 
+
 @dataclass
 class ContinueContextStatement(ContextStatement, Generic[T]):
     pass

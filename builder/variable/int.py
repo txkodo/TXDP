@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from builder.base.context import ContextStatement
+from builder.base.context import ContextEnvironment, ContextStatement
 from builder.base.fragment import Fragment
 from builder.base.variable import Assign, AssignOneline
 from builder.variable.base import BaseValue, BaseVariable
@@ -23,6 +23,9 @@ class Int(BaseVariable[int, IntValue]):
 
     def _store_target(self) -> NbtStoreableArgument:
         return NbtStoreableArgument(self.nbt, "int", 1)
+
+    def __mul__(self, value: float):
+        return self.scale(value)
 
 
 class IntValue(BaseValue[Int, int]):

@@ -2,7 +2,7 @@ from pathlib import Path
 import random
 import string
 import time
-from builder.base.context import ContextScope
+from builder.base.context import ContextEnvironment, ContextScope
 from builder.base.fragment import Fragment
 from builder.base.syntax import RootSyntax, SyntaxStack
 from builder.context.root import RootContextScope
@@ -60,8 +60,7 @@ def export(
     scope.clear_all_scope(init)
 
     # syntax -> *fragment
-    rootContext.scope = scope
-    rootContext._evalate(init, rootContext)
+    rootContext._evalate(init, ContextEnvironment(scope))
 
     funcs: list[Function] = []
 
