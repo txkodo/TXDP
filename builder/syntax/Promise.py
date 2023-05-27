@@ -23,7 +23,7 @@ AWAITING = 1
 FULLFILLED = 2
 
 
-def Await(promise: ServerPromise[T]) -> T:
+def _Await(promise: ServerPromise[T]) -> T:
     return promise.Await()
 
 

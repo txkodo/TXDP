@@ -1,12 +1,17 @@
+from typing import TypeVar
 from builder.base.syntax import SyntaxStack
 from builder.syntax.Elif import _BeforeElifSyntax, _Elif
 from builder.syntax.Else import _Else
 from builder.syntax.If import _If, _BeforeIfSyntax
+from builder.syntax.Promise import ServerPromise
 from builder.syntax.While import _While, _BeforeWhileSyntax
 from builder.syntax.DoWhile import _DoWhile, _BeforeDoWhileSyntax
 from builder.syntax.Break import _BreakSyntax
 from builder.syntax.Continue import _ContinueSyntax
 from builder.variable.condition import NbtCondition
+
+
+T = TypeVar("T")
 
 
 class _McMeta(type):
@@ -47,6 +52,13 @@ class _McMeta(type):
 
         def inner(condition: NbtCondition):
             return _DoWhile(condition)
+
+        return inner
+
+    @property
+    def Await(cls):
+        def inner(promise: ServerPromise[T]) -> T:
+            return promise.Await()
 
         return inner
 

@@ -4,7 +4,7 @@ from builder.syntax.AsyncFunction import AsyncMcfunction
 from builder.export.export import export
 from builder.syntax.Function import Mcfunction
 from builder.syntax.Mc import Mc
-from builder.syntax.Promise import Await, AwaitAll
+from builder.syntax.Promise import _Await, AwaitAll
 from builder.syntax.Run import Run
 from builder.syntax.Sleep import Sleep
 from builder.variable.Byte import Byte
@@ -25,14 +25,14 @@ def a1() -> None:
         with Mc.While(b != 0):
             Run("say ...")
             b.Set(b * 0.99)
-            Await(Sleep(1))
+            Mc.Await(Sleep(1))
 
         with Mc.If(a.matches(5)):
             Run("say 5")
             Mc.Break
 
         Run("say x")
-        Await(Sleep(1))
+        Mc.Await(Sleep(1))
 
     Run("say end")
 
