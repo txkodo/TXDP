@@ -1,10 +1,10 @@
 import random
 import string
+from engine.mc import Mc
 from engine.nbt.provider.base import NbtProvider
 from minecraft.command.argument.nbt import NbtArgument, StorageNbtArgument
 from minecraft.command.argument.resource_location import ResourceLocation
-
-TEMP_PROVIDER_ROOT = StorageNbtArgument(ResourceLocation("minecraft:")).root("temp")
+from minecraft.command.command.data import DataModifyFromSource, DataSetCommand
 
 
 def nbtId():
@@ -13,5 +13,10 @@ def nbtId():
 
 
 class TempNbtProvider(NbtProvider):
-    def provide(self) -> NbtArgument:
-        return TEMP_PROVIDER_ROOT.attr(nbtId())
+    @classmethod
+    def root(cls) -> NbtArgument:
+        return cls.system_storage.root("temp")
+
+    @classmethod
+    def Set(cls, provider: NbtProvider):
+        Mc.Run(lambda: DataSetCommand(cls.root(), DataModifyFromSource(provider.root())))

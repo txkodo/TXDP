@@ -1,10 +1,9 @@
 import random
 import string
+from engine.mc import Mc
 from engine.nbt.provider.base import NbtProvider
-from minecraft.command.argument.nbt import NbtArgument, StorageNbtArgument
-from minecraft.command.argument.resource_location import ResourceLocation
-
-ENV_PROVIDER_ROOT = StorageNbtArgument(ResourceLocation("minecraft:")).root("env")
+from minecraft.command.argument.nbt import NbtArgument
+from minecraft.command.command.data import DataAppendCommand, DataModifyFromSource, DataRemoveCommand
 
 
 def nbtId():
@@ -13,5 +12,14 @@ def nbtId():
 
 
 class EnvNbtProvider(NbtProvider):
-    def provide(self) -> NbtArgument:
-        return ENV_PROVIDER_ROOT.item(-1).attr(nbtId())
+    @classmethod
+    def root(cls) -> NbtArgument:
+        return cls.system_storage.root("env").item(-1)
+
+    @classmethod
+    def Push(cls, source: NbtProvider):
+        Mc.Run(lambda: DataAppendCommand(cls.system_storage.root("env"), DataModifyFromSource(source.root())))
+
+    @classmethod
+    def Pop(cls):
+        Mc.Run(lambda: DataRemoveCommand(cls.root()))

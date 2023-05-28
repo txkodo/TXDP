@@ -64,6 +64,8 @@ def mcFunction(func: Callable[[*P], R]) -> Callable[[*P], R]:
     root = ConstantNbtPath(TEMP_PROVIDER_ROOT)
     temp_args = get_temps(root, arg_types)
 
+    temp_provider = TempNbtProvider()
+
     if result_types is None:
         temp_result = None
     else:
@@ -71,15 +73,15 @@ def mcFunction(func: Callable[[*P], R]) -> Callable[[*P], R]:
 
     def export():
         env_args = get_temps(ConstantNbtPath(TEMP_PROVIDER_ROOT), arg_types)
-
-        # TODO: env.append(temp)
-        NbtProviderStack.push(EnvNbtProvider())
-        result_value = func(*temp_args)  # type: ignore
+        env_provider = EnvNbtProvider()
+        EnvNbtProvider.Push(temp_provider)
+        NbtProviderStack.push(env_provider)
+        result_value = func(*env_args)  # type: ignore
         NbtProviderStack.pop()
 
-        # TODO: temp = env[-1]
+        temp_provider.Set(env_provider)
         move_value(result_value, temp_result, False)
-        # TODO: env.pop()
+        EnvNbtProvider.Pop()
 
     def result(*args: *P) -> R:
         assert is_variables(args)

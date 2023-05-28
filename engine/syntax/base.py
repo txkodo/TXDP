@@ -5,7 +5,7 @@ class Syntax:
     pass
 
 
-class SyntaxBlock:
+class SyntaxBlock(Syntax):
     syntaxes: list[Syntax]
 
     def __init__(self) -> None:
