@@ -17,5 +17,5 @@ class StringValue:
     def _tag(self):
         return NbtStringTagArgument(self.value)
 
-    def Assign(self, target: String):
+    def _Assign(self, target: String):
         Mc.Run(lambda: DataSetCommand(target._path.nbt, DataModifyValueSource(self._tag())))

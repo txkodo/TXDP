@@ -17,3 +17,8 @@ class ContextBlock(Context):
 
     def __init__(self, contexts: list[Context]) -> None:
         self.contexts = contexts
+
+    def evalate(self, fragment: Fragment, env: Environment) -> Fragment:
+        for context in self.contexts:
+            fragment = context.evalate(fragment, env)
+        return fragment

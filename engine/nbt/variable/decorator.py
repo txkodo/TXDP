@@ -13,14 +13,20 @@ from typing import (
     get_args,
     get_origin,
 )
+from engine.export.hook import UnrollFunctionCall, UnrollFunctionDef
+from engine.fragment.fragment import Fragment
 from engine.mc import Mc
 from engine.nbt.nbtpath.base import NbtPath
 from engine.nbt.nbtpath.const import ConstantNbtPath
-from engine.nbt.provider.env import ENV_PROVIDER_ROOT, EnvNbtProvider
+from engine.nbt.nbtpath.provider_root import ProviderRootNbtPath
+from engine.nbt.provider.env import EnvNbtProvider
 from engine.nbt.provider.stack import NbtProviderStack
-from engine.nbt.provider.temp import TEMP_PROVIDER_ROOT, TempNbtProvider
+from engine.nbt.provider.temp import TempNbtProvider
 from engine.nbt.variable.base import PATH_MAGIC_ATTR, Variable, VariableError
 from engine.nbt.variable.McObject import McObject
+from engine.syntax.Embed import EmbedSyntax
+from engine.syntax.Funcdef import FuncdefSyntaxBlock
+from engine.syntax.stack import SyntaxStack
 from engine.util.zip import zip2
 from minecraft.command.command.literal import LiteralCommand
 
@@ -60,19 +66,27 @@ R = TypeVar("R", bound=VARIABLE | None)
 
 
 def mcFunction(func: Callable[[*P], R]) -> Callable[[*P], R]:
-    arg_types, result_types = extrude_signeture(func)
-    root = ConstantNbtPath(TEMP_PROVIDER_ROOT)
-    temp_args = get_temps(root, arg_types)
-
     temp_provider = TempNbtProvider()
+
+    arg_types, result_types = extrude_signeture(func)
+    root = ProviderRootNbtPath(temp_provider)
+    temp_args = get_temps(root, arg_types)
 
     if result_types is None:
         temp_result = None
     else:
         temp_result = get_temp(root, result_types)
 
-    def export():
-        env_args = get_temps(ConstantNbtPath(TEMP_PROVIDER_ROOT), arg_types)
+    syntax = FuncdefSyntaxBlock()
+    SyntaxStack.append(syntax)
+
+    entry = Fragment()
+
+    @UnrollFunctionDef
+    def _():
+        SyntaxStack.push(syntax)
+
+        env_args = get_temps(root, arg_types)
         env_provider = EnvNbtProvider()
         EnvNbtProvider.Push(temp_provider)
         NbtProviderStack.push(env_provider)
@@ -83,14 +97,22 @@ def mcFunction(func: Callable[[*P], R]) -> Callable[[*P], R]:
         move_value(result_value, temp_result, False)
         EnvNbtProvider.Pop()
 
+        SyntaxStack.pop()
+
     def result(*args: *P) -> R:
-        assert is_variables(args)
-        is_variables(args)
-        # 引数を一時スコープにコピー
-        move_values(args, temp_args, False)
-        Mc.Run(lambda: LiteralCommand("#RUN FUNCTION"))
-        # 変更された引数だけ呼び出し元を更新
-        move_values(temp_args, args, True)
+        embed = EmbedSyntax()
+
+        @UnrollFunctionCall
+        def _():
+            with embed:
+                assert is_variables(args)
+                is_variables(args)
+                # 引数を一時スコープにコピー
+                move_values(args, temp_args, False)
+                Mc.Call(entry)
+                # 変更された引数だけ呼び出し元を更新
+                move_values(temp_args, args, True)
+
         # 戻り値を返却
         return temp_result  # type: ignore
 

@@ -26,8 +26,11 @@ class Fragment:
         self.location = location
         self.commands = []
 
-    def append(self, *command: Command):
+    def append(self, *command: Command | FragmentCall):
         self.commands.extend(command)
 
     def __hash__(self) -> int:
         return id(self)
+
+    def call(self, subcommands: list[SubCommand], fragment: Fragment):
+        return FragmentCall(self, fragment, subcommands)

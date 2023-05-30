@@ -1,6 +1,5 @@
-from decimal import Context
 from typing import TypeVar
-from engine.context.base import ContextBlock
+from engine.context.base import Context, ContextBlock
 
 from engine.parse.parsers import ApplyPerser, Parsee, Parser, RepeatPerser, UnionPerser
 

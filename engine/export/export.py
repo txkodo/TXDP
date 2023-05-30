@@ -6,7 +6,7 @@ from engine.export.hook import UnrollFunctionCall, UnrollFunctionDef
 from engine.export.resolve_embed import resolve_embed, resolveEmbedSyntax
 from engine.fragment.directory import FunctionExport
 from engine.fragment.fragment import Fragment
-from engine.fragment.solver import exportFunctions
+from engine.fragment.solver import FragmentSolver
 from engine.nbt.provider.base import NbtProvider
 from engine.parse.root import parseRootSyntaxBlock
 from engine.syntax.Root import RootSyntaxBlock
@@ -66,7 +66,7 @@ def export(
     context.evalate(init, env)
 
     # fragmentをfunctionに変換
-    funcs = exportFunctions()
+    funcs = FragmentSolver(Fragment.fragements).solve()
 
     # datapackを出力
     Datapack(path, funcs).export()

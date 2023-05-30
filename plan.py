@@ -1,17 +1,20 @@
+from pathlib import Path
+from engine.mc import Mc
 from engine.nbt.nbtpath.scope import ScopeNbtPath
-from engine.nbt.provider.root import RootNbtProvider
-from engine.nbt.provider.stack import NbtProviderStack
+from engine.nbt.variable.String import String, StringValue
 from engine.nbt.variable.custom import MyVariable
-from engine.syntax.stack import SyntaxStack
-
-
-NbtProviderStack.push(RootNbtProvider())
-
+from engine.nbt.variable.decorator import mcFunction
 
 myva = MyVariable.new(ScopeNbtPath())
 
+# @mcFunction
+# def testMethod(a: String) -> None:
+#     a.Set(StringValue("TESTMETHOD"))
 
-print(myva.a._path.nbt)
-myva.testMethod()
+myva.a.Set(StringValue("TESTMETHOD"))
 
-print(SyntaxStack.stack[-1].syntaxes[0].command())
+a = String.new(ScopeNbtPath())
+a.Set(StringValue("TESTMETHOD"))
+# testMethod(String.new(ScopeNbtPath()))
+
+Mc.export(Path(), "txc")

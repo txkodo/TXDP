@@ -4,6 +4,7 @@ from engine.syntax.stack import SyntaxStack
 
 class EmbedSyntax(SyntaxBlock):
     def __init__(self) -> None:
+        super().__init__()
         SyntaxStack.append(self)
 
     def __enter__(self):

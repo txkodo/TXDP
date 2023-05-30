@@ -1,5 +1,4 @@
 from __future__ import annotations
-from abc import abstractmethod
 from minecraft.command.argument.nbt import NbtArgument
 
 
