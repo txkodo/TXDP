@@ -11,9 +11,12 @@ from engine.syntax.Run import RunSyntax
 RootBlockParser = BlockPerser(RootContextBlock)
 
 
-CallParser = ApplyPerser(SymbolParser(CallSyntax), lambda x: CallContext(x.fragment,x.subcommands))
+CallParser = ApplyPerser(SymbolParser(CallSyntax), lambda x: CallContext(x.fragment, x.subcommands))
 RunParser = ApplyPerser(SymbolParser(RunSyntax), lambda x: RunContext(x.command))
-FuncdefParser = ApplyPerser(SymbolParser(FuncdefSyntaxBlock), lambda x: FuncdefContextBlock(RootBlockParser.parseAll(x.syntaxes).contexts))
+FuncdefParser = ApplyPerser(
+    SymbolParser(FuncdefSyntaxBlock),
+    lambda x: FuncdefContextBlock(RootBlockParser.parseAll(x.syntaxes).contexts, x.entry),
+)
 
 RootBlockParser.append(CallParser)
 RootBlockParser.append(RunParser)

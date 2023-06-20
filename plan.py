@@ -7,14 +7,20 @@ from engine.nbt.variable.decorator import mcFunction
 
 myva = MyVariable.new(ScopeNbtPath())
 
-# @mcFunction
-# def testMethod(a: String) -> None:
-#     a.Set(StringValue("TESTMETHOD"))
+
+@mcFunction
+def testMethod(a: String) -> String:
+    a.Set(StringValue("TESTMETHOD"))
+    return a
+
 
 myva.a.Set(StringValue("TESTMETHOD"))
 
 a = String.new(ScopeNbtPath())
 a.Set(StringValue("TESTMETHOD"))
-# testMethod(String.new(ScopeNbtPath()))
+
+testMethod(a).Set(StringValue("2"))
+
+testMethod(a).Set(StringValue("3"))
 
 Mc.export(Path(), "txc")

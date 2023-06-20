@@ -34,11 +34,15 @@ class FragmentNode(_Node):
     def __hash__(self) -> int:
         return id(self)
 
+
 @dataclass
 class FragmentEdge:
     subcommands: list[SubCommand]
     from_: FragmentNode
     to_: _Node
+
+    def __hash__(self) -> int:
+        return id(self)
 
 
 class FragmentSolver:
@@ -95,6 +99,9 @@ class FragmentSolver:
         root_node = edge.from_
         embed_node = edge.to_
         assert isinstance(embed_node, FragmentNode)
+        # 埋め込みノードを削除
+        self.non_roots.remove(embed_node)
+
         commands: list[FragmentEdge] = []
         for e in root_node.commands:
             if e == edge:
@@ -102,7 +109,8 @@ class FragmentSolver:
                     sub_edge.from_ = root_node
                     commands.append(sub_edge)
             else:
-                commands.append(edge)
+                commands.append(e)
+        root_node.commands = commands
 
     def inline(self, node: FragmentNode):
         """指定したノード{embed_node}を親ノード{root_node}にインライン埋め込み。"""
@@ -134,8 +142,9 @@ class FragmentSolver:
 
     def remove_unreachable_fragments(self):
         """rootからたどり着けないNodeを削除"""
-
         def mark_reachable(node: FragmentNode):
+            if node.reachable:
+                return
             node.reachable = True
             for edge in node.commands:
                 child = edge.to_
@@ -189,7 +198,6 @@ class FragmentSolver:
                     # 埋め込み元が再埋め込みできる可能性があるので_checklistに追加
                     _checklist.append(in_edge.from_)
                     continue
-
             checklist = _checklist
 
     def resolve_single_in_single_out(self):

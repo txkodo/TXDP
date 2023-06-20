@@ -2,9 +2,9 @@ import random
 import string
 from engine.mc import Mc
 from engine.nbt.provider.base import NbtProvider
-from minecraft.command.argument.nbt import NbtArgument, StorageNbtArgument
-from minecraft.command.argument.resource_location import ResourceLocation
-from minecraft.command.command.data import DataModifyFromSource, DataSetCommand
+from minecraft.command.argument.nbt import NbtArgument
+from minecraft.command.argument.nbt_tag import NbtCompoundTagArgument
+from minecraft.command.command.data import DataModifyFromSource, DataModifyValueSource, DataSetCommand
 
 
 def nbtId():
@@ -20,3 +20,7 @@ class TempNbtProvider(NbtProvider):
     @classmethod
     def Set(cls, provider: NbtProvider):
         Mc.Run(lambda: DataSetCommand(cls.root(), DataModifyFromSource(provider.root())))
+
+    @classmethod
+    def Reset(cls):
+        Mc.Run(lambda: DataSetCommand(cls.root(), DataModifyValueSource(NbtCompoundTagArgument({}))))

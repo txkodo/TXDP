@@ -19,4 +19,8 @@ class NbtProvider:
 
     @final
     def provide(self) -> NbtArgument:
-        return self.root().attr(nbtId())
+        return self.provide_id(nbtId())
+
+    @final
+    def provide_id(self, id: str) -> NbtArgument:
+        return self.root().attr(id)

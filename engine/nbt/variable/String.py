@@ -1,3 +1,4 @@
+from typing import Self
 from engine.mc import Mc
 from engine.nbt.variable.base import Variable
 from minecraft.command.argument.nbt_tag import NbtStringTagArgument
@@ -5,17 +6,13 @@ from minecraft.command.command.data import DataModifyValueSource, DataSetCommand
 
 
 class String(Variable):
-    pass
+    def __init__(self, value: Self | str | None = None) -> None:
+        super().__init__()
+        if value is not None:
+            self.Set(value)
 
-
-class StringValue:
-    _assign_target: type[String]
-
-    def __init__(self, value: str) -> None:
-        self.value = value
-
-    def _tag(self):
-        return NbtStringTagArgument(self.value)
-
-    def _Assign(self, target: String):
-        Mc.Run(lambda: DataSetCommand(target._path.nbt, DataModifyValueSource(self._tag())))
+    def Set(self, value: Self | str):
+        if isinstance(value, str):
+            Mc.Run(lambda: DataSetCommand(self._path.nbt, DataModifyValueSource(NbtStringTagArgument(value))))
+        else:
+            return super().Set(value)

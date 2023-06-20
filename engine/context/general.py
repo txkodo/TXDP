@@ -24,9 +24,11 @@ class CallContext(Context):
         return fragment
 
 
+@dataclass
 class FuncdefContextBlock(ContextBlock):
+    entry: Fragment
+
     def evalate(self, fragment: Fragment, env: Environment) -> Fragment:
-        f = Fragment()
         for context in self.contexts:
-            f = context.evalate(f, env)
+            self.entry = context.evalate(self.entry, env)
         return fragment

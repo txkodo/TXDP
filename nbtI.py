@@ -1,15 +1,13 @@
-from asyncio import run, sleep
-import time
 
+def a():
+    print(x)
 
-async def t():
-    t = time.time()
-    a5 = sleep(5)
-    a3 = sleep(3)
-    await a3
-    print(time.time() - t)
-    await a5
-    print(time.time() - t)
+aa = a
 
+x = 100
 
-run(t())
+def b():
+    aa()
+    print(x)
+
+b()

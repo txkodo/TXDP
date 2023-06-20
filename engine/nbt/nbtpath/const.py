@@ -1,10 +1,11 @@
+from dataclasses import dataclass
 from engine.nbt.nbtpath.base import NbtPath
 from minecraft.command.argument.nbt import NbtArgument
 
 
+@dataclass
 class ConstantNbtPath(NbtPath):
-    def __init__(self, nbt: NbtArgument) -> None:
-        self._nbt = nbt
+    _nbt: NbtArgument
 
     @property
     def nbt(self) -> NbtArgument:

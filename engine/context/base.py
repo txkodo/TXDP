@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from dataclasses import dataclass
 from engine.fragment.fragment import Fragment
 
 
@@ -12,6 +13,7 @@ class Context:
         pass
 
 
+@dataclass
 class ContextBlock(Context):
     contexts: list[Context]
 
